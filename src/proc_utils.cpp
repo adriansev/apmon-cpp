@@ -44,16 +44,17 @@
 #include <dirent.h>
 #endif
 
+using namespace std;
 using namespace apmon_utils;
 
 void ProcUtils::getCPUUsage(ApMon& apm, double& cpuUsage, 
-			       double& cpuUsr, double& cpuSys, 
-			       double& cpuNice, double& cpuIdle,
-			       double& cpuIOWait, double& cpuIRQ,
-			       double& cpuSoftIRQ, double& cpuSteal,
-			       double& cpuGuest,
-			       int numCPUs)
-  throw (runtime_error, procutils_error) {
+                   double& cpuUsr, double& cpuSys, 
+                   double& cpuNice, double& cpuIdle,
+                   double& cpuIOWait, double& cpuIRQ,
+                   double& cpuSoftIRQ, double& cpuSteal,
+                   double& cpuGuest,
+                   int numCPUs)
+  throw (std::runtime_error, procutils_error) {
 
 #ifndef WIN32
   FILE *fp1;
@@ -76,29 +77,29 @@ void ProcUtils::getCPUUsage(ApMon& apm, double& cpuUsage,
   time_t crtTime = time(NULL);
 
 #ifdef __SUNOS
-	double tmp = 0;
+    double tmp = 0;
 
-	char extraline[MAX_STRING_LEN];
+    char extraline[MAX_STRING_LEN];
 
-	fp1 = popen("vmstat -s", "r");
+    fp1 = popen("vmstat -s", "r");
 
-	while (fgets(line, MAX_STRING_LEN, fp1)){
-		sscanf(line, "%lf %s", &tmp, extraline);
+    while (fgets(line, MAX_STRING_LEN, fp1)){
+        sscanf(line, "%lf %s", &tmp, extraline);
 
-		if (!strcmp(extraline, "user"))
-			usrTime = tmp;
-		else
-		if (!strcmp(extraline, "system"))
-			sysTime = tmp;
-		else
-		if (!strcmp(extraline, "idle"))
-			idleTime = tmp;
-		else
-		if (!strcmp(extraline, "wait"))
-			iowaitTime = tmp;
-	}
-	
-	pclose(fp1);
+        if (!strcmp(extraline, "user"))
+            usrTime = tmp;
+        else
+        if (!strcmp(extraline, "system"))
+            sysTime = tmp;
+        else
+        if (!strcmp(extraline, "idle"))
+            idleTime = tmp;
+        else
+        if (!strcmp(extraline, "wait"))
+            iowaitTime = tmp;
+    }
+    
+    pclose(fp1);
 #else
   fp1 = fopen("/proc/stat", "r");
   if (fp1 == NULL)
@@ -106,7 +107,7 @@ void ProcUtils::getCPUUsage(ApMon& apm, double& cpuUsage,
 
   while (fgets(line, MAX_STRING_LEN, fp1)) {
       if (strstr(line, "cpu") == line)
-	break;
+    break;
   }
   
   if (line == NULL) {
@@ -198,9 +199,9 @@ void ProcUtils::getCPUUsage(ApMon& apm, double& cpuUsage,
 }
 
 void ProcUtils::getSwapPages(ApMon& apm, double& pagesIn, 
-			       double& pagesOut, double& swapIn, 
-			     double& swapOut) 
-  throw (runtime_error, procutils_error) {
+                   double& pagesOut, double& swapIn, 
+                 double& swapOut) 
+  throw (std::runtime_error, procutils_error) {
 #ifndef WIN32
   FILE *fp1;
   char line[MAX_STRING_LEN];
@@ -214,65 +215,65 @@ void ProcUtils::getSwapPages(ApMon& apm, double& pagesIn,
   foundPages = foundSwap = false;
 
 #ifdef __SUNOS
-	double tmp = 0;
+    double tmp = 0;
 
-	char w1[MAX_STRING_LEN];
-	char w2[MAX_STRING_LEN];
-	char w3[MAX_STRING_LEN];
+    char w1[MAX_STRING_LEN];
+    char w2[MAX_STRING_LEN];
+    char w3[MAX_STRING_LEN];
 
-	swapIn = swapOut = pagesIn = pagesOut = 0;
+    swapIn = swapOut = pagesIn = pagesOut = 0;
 
-	fp1 = popen("vmstat -s", "r");
-	
-	if (fp1==NULL){
-	    throw procutils_error("Cannot run vmstat -s");
-	}
+    fp1 = popen("vmstat -s", "r");
+    
+    if (fp1==NULL){
+        throw procutils_error("Cannot run vmstat -s");
+    }
 
-	while (fgets(line, MAX_STRING_LEN, fp1)){
-		sscanf(line, "%lf %s %s %s", &tmp, w1, w2, w3);
+    while (fgets(line, MAX_STRING_LEN, fp1)){
+        sscanf(line, "%lf %s %s %s", &tmp, w1, w2, w3);
 
-		int index = -1;
+        int index = -1;
 
-		if (strcmp(w1, "pages")==0){
-			if (strcmp(w2, "swapped")==0){
-				if (strcmp(w3, "in")==0){
-					index = getVectIndex("swap_in", apm.sysMonitorParams, apm.nSysMonitorParams);
-					foundSwap = true;
-					if (tmp >= apm.lastSysVals[index])
-						swapIn = (tmp - apm.lastSysVals[index]) / (crtTime - apm.lastSysInfoSend);
-				}
-				else
-				if (strcmp(w3, "out")==0){
-					foundSwap = true;
-					index = getVectIndex("swap_out", apm.sysMonitorParams, apm.nSysMonitorParams);
-					if (tmp >= apm.lastSysVals[index])
-						swapOut = (tmp - apm.lastSysVals[index]) / (crtTime - apm.lastSysInfoSend);
-				}
-			}
-			else
-			if (strcmp(w2, "paged")==0){
-				if (strcmp(w3, "in")==0){
-					foundPages = true;
-					index = getVectIndex("pages_in", apm.sysMonitorParams, apm.nSysMonitorParams);
-					if (tmp >= apm.lastSysVals[index])
-						pagesIn = (tmp - apm.lastSysVals[index]) / (crtTime - apm.lastSysInfoSend);
-				}
-				else
-				if (strcmp(w3, "out")==0){
-					foundPages = true;
-					index = getVectIndex("pages_out", apm.sysMonitorParams, apm.nSysMonitorParams);
-					if (tmp >= apm.lastSysVals[index])
-						pagesOut = (tmp - apm.lastSysVals[index]) / (crtTime - apm.lastSysInfoSend);
+        if (strcmp(w1, "pages")==0){
+            if (strcmp(w2, "swapped")==0){
+                if (strcmp(w3, "in")==0){
+                    index = getVectIndex("swap_in", apm.sysMonitorParams, apm.nSysMonitorParams);
+                    foundSwap = true;
+                    if (tmp >= apm.lastSysVals[index])
+                        swapIn = (tmp - apm.lastSysVals[index]) / (crtTime - apm.lastSysInfoSend);
+                }
+                else
+                if (strcmp(w3, "out")==0){
+                    foundSwap = true;
+                    index = getVectIndex("swap_out", apm.sysMonitorParams, apm.nSysMonitorParams);
+                    if (tmp >= apm.lastSysVals[index])
+                        swapOut = (tmp - apm.lastSysVals[index]) / (crtTime - apm.lastSysInfoSend);
+                }
+            }
+            else
+            if (strcmp(w2, "paged")==0){
+                if (strcmp(w3, "in")==0){
+                    foundPages = true;
+                    index = getVectIndex("pages_in", apm.sysMonitorParams, apm.nSysMonitorParams);
+                    if (tmp >= apm.lastSysVals[index])
+                        pagesIn = (tmp - apm.lastSysVals[index]) / (crtTime - apm.lastSysInfoSend);
+                }
+                else
+                if (strcmp(w3, "out")==0){
+                    foundPages = true;
+                    index = getVectIndex("pages_out", apm.sysMonitorParams, apm.nSysMonitorParams);
+                    if (tmp >= apm.lastSysVals[index])
+                        pagesOut = (tmp - apm.lastSysVals[index]) / (crtTime - apm.lastSysInfoSend);
 
-				}
-			}
-		}
+                }
+            }
+        }
 
-		if (index>=0)
-			apm.lastSysVals[index] = tmp;
-	}
-	
-	pclose(fp1);
+        if (index>=0)
+            apm.lastSysVals[index] = tmp;
+    }
+    
+    pclose(fp1);
 #else
   fp1 = fopen("/proc/stat", "r");
   if (fp1 == NULL)
@@ -288,9 +289,9 @@ void ProcUtils::getSwapPages(ApMon& apm, double& pagesIn,
       ind1 = getVectIndex("pages_in", apm.sysMonitorParams, apm.nSysMonitorParams);
       ind2 = getVectIndex("pages_out", apm.sysMonitorParams, apm.nSysMonitorParams);
       if (p_in < apm.lastSysVals[ind1] || p_out < apm.lastSysVals[ind2]) {
-	apm.lastSysVals[ind1] = p_in;
-	apm.lastSysVals[ind2] = p_out;
-	throw runtime_error("[ getSwapPages() ] Pages in/out counter reset");
+    apm.lastSysVals[ind1] = p_in;
+    apm.lastSysVals[ind2] = p_out;
+    throw runtime_error("[ getSwapPages() ] Pages in/out counter reset");
       }
       pagesIn = (p_in - apm.lastSysVals[ind1]) / (crtTime - apm.lastSysInfoSend);
       pagesOut = (p_out - apm.lastSysVals[ind2]) / (crtTime - apm.lastSysInfoSend);
@@ -306,9 +307,9 @@ void ProcUtils::getSwapPages(ApMon& apm, double& pagesIn,
       ind1 = getVectIndex("swap_in", apm.sysMonitorParams, apm.nSysMonitorParams);
       ind2 = getVectIndex("swap_out", apm.sysMonitorParams, apm.nSysMonitorParams);
       if (s_in < apm.lastSysVals[ind1] || s_out < apm.lastSysVals[ind2]) {
-	apm.lastSysVals[ind1] = s_in;
-	apm.lastSysVals[ind2] = s_out;
-	throw runtime_error("[ getSwapPages() ] Swap in/out counter reset");
+    apm.lastSysVals[ind1] = s_in;
+    apm.lastSysVals[ind2] = s_out;
+    throw runtime_error("[ getSwapPages() ] Swap in/out counter reset");
       }
       swapIn = (s_in - apm.lastSysVals[ind1]) / (crtTime - apm.lastSysInfoSend);
       swapOut = (s_out - apm.lastSysVals[ind2]) / (crtTime - apm.lastSysInfoSend);
@@ -329,33 +330,33 @@ void ProcUtils::getSwapPages(ApMon& apm, double& pagesIn,
 }
 
 void ProcUtils::getLoad(double &load1, double &load5, 
-	   double &load15, double &processes) 
+       double &load15, double &processes) 
   throw(procutils_error) {
 #ifndef WIN32
   double v1, v5, v15, activeProcs, totalProcs;
   FILE *fp1;
 
 #ifdef __SUNOS
-	char line[MAX_STRING_LEN];
+    char line[MAX_STRING_LEN];
 
-	fp1 = popen("uptime", "r");
+    fp1 = popen("uptime", "r");
 
-	fgets(line, MAX_STRING_LEN, fp1);
+    fgets(line, MAX_STRING_LEN, fp1);
 
-	char* ptr = strtok(line, " ,");
+    char* ptr = strtok(line, " ,");
 
-	while (ptr){
-		load1 = load5;
-		load5 = load15;
-		load15 = atof(ptr);
+    while (ptr){
+        load1 = load5;
+        load5 = load15;
+        load15 = atof(ptr);
 
-		ptr = strtok(NULL, " ,");
-	}
-	
-	// uptime on SunOS doesn't contain the number of processes on the system
-	processes = RET_ERROR;
-	
-	pclose(fp1);
+        ptr = strtok(NULL, " ,");
+    }
+    
+    // uptime on SunOS doesn't contain the number of processes on the system
+    processes = RET_ERROR;
+    
+    pclose(fp1);
 #else
   fp1 = fopen("/proc/loadavg", "r");
   if (fp1 == NULL)
@@ -386,7 +387,7 @@ void ProcUtils::getLoad(double &load1, double &load5,
 }
 
 void ProcUtils::getProcesses(double& processes, double states[]) 
-  throw(runtime_error) {
+  throw(std::runtime_error) {
 #if defined(WIN32) || defined(__SUNOS)
   processes = RET_ERROR;
 
@@ -453,52 +454,52 @@ double valMem, valSwap;
 FILE *fp1;
 
 #ifdef __SUNOS
-	  char tempbuf[MAX_STRING_LEN];
-	  char* pbuf = tempbuf;
+      char tempbuf[MAX_STRING_LEN];
+      char* pbuf = tempbuf;
 
-	  fp1 = popen("prtconf", "r");
-	  while (fgets(line, MAX_STRING_LEN, fp1)){
-		  if (!memFound && strstr(line, "Memory size")==line){	// Memory size: 768 Megabytes
-			  memFound = true;
+      fp1 = popen("prtconf", "r");
+      while (fgets(line, MAX_STRING_LEN, fp1)){
+          if (!memFound && strstr(line, "Memory size")==line){    // Memory size: 768 Megabytes
+              memFound = true;
 
-			  strtok_r(line, " \t\n", &pbuf);
-			  strtok_r(NULL, " \t\n", &pbuf);
-			  valMem = atof(strtok_r(NULL, " \t\n", &pbuf));
+              strtok_r(line, " \t\n", &pbuf);
+              strtok_r(NULL, " \t\n", &pbuf);
+              valMem = atof(strtok_r(NULL, " \t\n", &pbuf));
 
-			  switch (strtok_r(NULL, " \t\n", &pbuf)[0]){
-				  case 'T':
-				  case 't': valMem *= 1024;
-				  case 'G':
-				  case 'g': valMem *= 1024;
-				  case 'M':
-				  case 'm': valMem *= 1024;
-				  case 'K':
-				  case 'k': valMem *= 1024;
-			  }
-		  }
-	  }
+              switch (strtok_r(NULL, " \t\n", &pbuf)[0]){
+                  case 'T':
+                  case 't': valMem *= 1024;
+                  case 'G':
+                  case 'g': valMem *= 1024;
+                  case 'M':
+                  case 'm': valMem *= 1024;
+                  case 'K':
+                  case 'k': valMem *= 1024;
+              }
+          }
+      }
 
-	  pclose(fp1);
+      pclose(fp1);
 
-	  fp1 = popen("swap -l", "r");
+      fp1 = popen("swap -l", "r");
 
-	  if (fgets(line, MAX_STRING_LEN, fp1)){ //swapfile             dev    swaplo   blocks     free
-		  swapFound = true;
-	  }
+      if (fgets(line, MAX_STRING_LEN, fp1)){ //swapfile             dev    swaplo   blocks     free
+          swapFound = true;
+      }
 
-	  while (fgets(line, MAX_STRING_LEN, fp1)){
-		  ///dev/zvol/dsk/rpool/swap 182,1         8  1048568  1046496
+      while (fgets(line, MAX_STRING_LEN, fp1)){
+          ///dev/zvol/dsk/rpool/swap 182,1         8  1048568  1046496
 
-		  strtok_r(line, " \t\n", &pbuf);
-		  strtok_r(NULL, " \t\n", &pbuf);
-		  strtok_r(NULL, " \t\n", &pbuf);
+          strtok_r(line, " \t\n", &pbuf);
+          strtok_r(NULL, " \t\n", &pbuf);
+          strtok_r(NULL, " \t\n", &pbuf);
 
-		  double swapBlocks = atof(strtok_r(NULL, " \t\n", &pbuf));
-		  
-		  valSwap += swapBlocks * 512;	// 512-byte blocks
-	  }
-	  
-	  pclose(fp1);
+          double swapBlocks = atof(strtok_r(NULL, " \t\n", &pbuf));
+          
+          valSwap += swapBlocks * 512;    // 512-byte blocks
+      }
+      
+      pclose(fp1);
 #else
   fp1 = fopen("/proc/meminfo", "r");
   if (fp1 == NULL)
@@ -531,7 +532,7 @@ FILE *fp1;
 }
 
 void ProcUtils::getMemUsed(double &usedMem, double& freeMem, 
-				  double &usedSwap, double& freeSwap) 
+                  double &usedSwap, double& freeSwap) 
   throw(procutils_error) {
 #ifndef WIN32
 
@@ -548,12 +549,12 @@ void ProcUtils::getMemUsed(double &usedMem, double& freeMem,
   fgets(line, MAX_STRING_LEN, fp1); // r b w   swap  free  re  mf pi po fr de sr cd f0 s0 --   in   sy   cs us sy id
 
   if (fgets(line, MAX_STRING_LEN, fp1)){ // 0 0 0 494204 64652  13  79  0  0  1  0 53  3 -0  1  0  313  673  275  2 10 88
-	  mFreeFound = true;
+      mFreeFound = true;
   }
   else{
-	usedMem = freeMem = usedSwap = freeSwap = -1;
-	pclose(fp1);
-	throw procutils_error("[ getMemUsed() ] Cannot read memory info from vmstat");
+    usedMem = freeMem = usedSwap = freeSwap = -1;
+    pclose(fp1);
+    throw procutils_error("[ getMemUsed() ] Cannot read memory info from vmstat");
   }
 
   char tempbuf[MAX_STRING_LEN];
@@ -569,24 +570,24 @@ void ProcUtils::getMemUsed(double &usedMem, double& freeMem,
 
   fp1 = popen("prtconf", "r");
   while (fgets(line, MAX_STRING_LEN, fp1)){
-	  if (!mTotalFound && strstr(line, "Memory size")==line){	// Memory size: 768 Megabytes
-		  mTotalFound = true;
+      if (!mTotalFound && strstr(line, "Memory size")==line){    // Memory size: 768 Megabytes
+          mTotalFound = true;
 
-		  strtok_r(line, " \t\n", &pbuf);
-		  strtok_r(NULL, " \t\n", &pbuf);
-		  mTotal = atof(strtok_r(NULL, " \t\n", &pbuf));
+          strtok_r(line, " \t\n", &pbuf);
+          strtok_r(NULL, " \t\n", &pbuf);
+          mTotal = atof(strtok_r(NULL, " \t\n", &pbuf));
 
-		  switch (strtok_r(NULL, " \t\n", &pbuf)[0]){
-			  case 'T':
-			  case 't': mTotal *= 1024;
-			  case 'G':
-			  case 'g': mTotal *= 1024;
-			  case 'M':
-			  case 'm': mTotal *= 1024;
-			  case 'K':
-			  case 'k': mTotal *= 1024;
-		  }
-	  }
+          switch (strtok_r(NULL, " \t\n", &pbuf)[0]){
+              case 'T':
+              case 't': mTotal *= 1024;
+              case 'G':
+              case 'g': mTotal *= 1024;
+              case 'M':
+              case 'm': mTotal *= 1024;
+              case 'K':
+              case 'k': mTotal *= 1024;
+          }
+      }
   }
 
   pclose(fp1);
@@ -594,21 +595,21 @@ void ProcUtils::getMemUsed(double &usedMem, double& freeMem,
   fp1 = popen("swap -l", "r");
 
   if (fgets(line, MAX_STRING_LEN, fp1)){ //swapfile             dev    swaplo   blocks     free
-	  sTotalFound = sFreeFound = true;
+      sTotalFound = sFreeFound = true;
   }
 
   while (fgets(line, MAX_STRING_LEN, fp1)){
-	  ///dev/zvol/dsk/rpool/swap 182,1         8  1048568  1046496
+      ///dev/zvol/dsk/rpool/swap 182,1         8  1048568  1046496
 
-	  strtok_r(line, " \t\n", &pbuf);
-	  strtok_r(NULL, " \t\n", &pbuf);
-	  strtok_r(NULL, " \t\n", &pbuf);
+      strtok_r(line, " \t\n", &pbuf);
+      strtok_r(NULL, " \t\n", &pbuf);
+      strtok_r(NULL, " \t\n", &pbuf);
 
-	  double swapBlocks = atof(strtok_r(NULL, " \t\n", &pbuf));
-	  double freeBlocks = atof(strtok_r(NULL, " \t\n", &pbuf));
-	  
-	  sTotal += swapBlocks * 512;
-	  sFree += freeBlocks * 512;
+      double swapBlocks = atof(strtok_r(NULL, " \t\n", &pbuf));
+      double freeBlocks = atof(strtok_r(NULL, " \t\n", &pbuf));
+      
+      sTotal += swapBlocks * 512;
+      sFree += freeBlocks * 512;
   }
   
   pclose(fp1);
@@ -666,7 +667,7 @@ void ProcUtils::getMemUsed(double &usedMem, double& freeMem,
 }
 
 void ProcUtils::getNetworkInterfaces(int &nInterfaces, 
-		      char names[][20]) throw(procutils_error) {
+              char names[][20]) throw(procutils_error) {
 
 nInterfaces = 0;
 
@@ -674,46 +675,46 @@ nInterfaces = 0;
 
 
 #ifdef __SUNOS
-	// on SunOS the TCP stats are global, not per interface, so we account everything under a virtual "eth0" device
-	//nInterfaces = 1;
-	//strcpy(names[0], "eth0");
-	
-	int sockfd, i;
-	struct lifnum ln;
-	struct lifconf lc;
+    // on SunOS the TCP stats are global, not per interface, so we account everything under a virtual "eth0" device
+    //nInterfaces = 1;
+    //strcpy(names[0], "eth0");
+    
+    int sockfd, i;
+    struct lifnum ln;
+    struct lifconf lc;
 
-	sockfd=socket(AF_INET,SOCK_DGRAM,IPPROTO_UDP);
+    sockfd=socket(AF_INET,SOCK_DGRAM,IPPROTO_UDP);
 
-	ln.lifn_family=AF_INET;
-	ln.lifn_flags=ln.lifn_count=0; 
+    ln.lifn_family=AF_INET;
+    ln.lifn_flags=ln.lifn_count=0; 
 
-	if (ioctl(sockfd,SIOCGLIFNUM,&ln) == -1){
-	    perror("Failed to get number of interfaces");
-	    close(sockfd);
-	    return;
-	}
-	
-	lc.lifc_family=AF_INET;
-	lc.lifc_flags=0; 
-	lc.lifc_len=ln.lifn_count * sizeof(struct lifreq);
-	
-	lc.lifc_req=(struct lifreq *) malloc(lc.lifc_len);
-	
-	if (ioctl(sockfd,SIOCGLIFCONF,&lc) == -1){
-	    perror("Failed to enumerate interfaces");
-	    close(sockfd);
-	    free(lc.lifc_req);
-	    return;
-	}
-	
-	for (i=0; i<ln.lifn_count && i<100; i++){
-	    strncpy(names[nInterfaces], lc.lifc_req[i].lifr_name, 19);
-	    nInterfaces ++;
-	}
-	
-	close(sockfd);
-	free(lc.lifc_req);
-	
+    if (ioctl(sockfd,SIOCGLIFNUM,&ln) == -1){
+        perror("Failed to get number of interfaces");
+        close(sockfd);
+        return;
+    }
+    
+    lc.lifc_family=AF_INET;
+    lc.lifc_flags=0; 
+    lc.lifc_len=ln.lifn_count * sizeof(struct lifreq);
+    
+    lc.lifc_req=(struct lifreq *) malloc(lc.lifc_len);
+    
+    if (ioctl(sockfd,SIOCGLIFCONF,&lc) == -1){
+        perror("Failed to enumerate interfaces");
+        close(sockfd);
+        free(lc.lifc_req);
+        return;
+    }
+    
+    for (i=0; i<ln.lifn_count && i<100; i++){
+        strncpy(names[nInterfaces], lc.lifc_req[i].lifr_name, 19);
+        nInterfaces ++;
+    }
+    
+    close(sockfd);
+    free(lc.lifc_req);
+    
 #else
   char line[MAX_STRING_LEN], *tmp;
 //  char buf[MAX_STRING_LEN];
@@ -743,8 +744,8 @@ nInterfaces = 0;
 }
 
 void ProcUtils::getNetInfo(ApMon& apm, double **vNetIn, 
-				  double **vNetOut, double **vNetErrs) 
-  throw(runtime_error, procutils_error) {
+                  double **vNetOut, double **vNetErrs) 
+  throw(std::runtime_error, procutils_error) {
 #ifndef WIN32
   double *netIn, *netOut, *netErrs, bytesReceived = 0, bytesSent = 0;
   int errs = 0;
@@ -781,45 +782,45 @@ void ProcUtils::getNetInfo(ApMon& apm, double **vNetIn,
     ind = -1;
 
     for (i=0; i<apm.nInterfaces; i++){
-	netIn[i] = RET_ERROR;
-	netOut[i] = RET_ERROR;
-	netErrs[i] = RET_ERROR;
+    netIn[i] = RET_ERROR;
+    netOut[i] = RET_ERROR;
+    netErrs[i] = RET_ERROR;
 
-	if ( strncmp(apm.interfaceNames[i], "lo", 2) == 0 )
-	    continue;
-	
-	if (ind<0)
-	    ind = i;
+    if ( strncmp(apm.interfaceNames[i], "lo", 2) == 0 )
+        continue;
+    
+    if (ind<0)
+        ind = i;
     }
     
     if (ind<0){
-	pclose(fp1);
-	return;
+    pclose(fp1);
+    return;
     }
 
-	while (fgets(line, MAX_STRING_LEN, fp1)){
-		char* ptr = strtok(line, " =\t");
+    while (fgets(line, MAX_STRING_LEN, fp1)){
+        char* ptr = strtok(line, " =\t");
 
-		while (ptr){
-			if (strstr(ptr, "tcpIn")==ptr && strstr(ptr, "Bytes")!=NULL){
-				ptr = strtok(NULL, " =\t");
+        while (ptr){
+            if (strstr(ptr, "tcpIn")==ptr && strstr(ptr, "Bytes")!=NULL){
+                ptr = strtok(NULL, " =\t");
 
-				bytesReceived += atof(ptr);
-			}
-			else
-				if (strcmp(ptr, "tcpOutDataBytes")==0 || strcmp(ptr, "tcpRetransBytes")==0){
-					ptr = strtok(NULL, " =\t");
+                bytesReceived += atof(ptr);
+            }
+            else
+                if (strcmp(ptr, "tcpOutDataBytes")==0 || strcmp(ptr, "tcpRetransBytes")==0){
+                    ptr = strtok(NULL, " =\t");
 
-					bytesSent += atof(ptr);
-				}
+                    bytesSent += atof(ptr);
+                }
 
-			ptr = strtok(NULL, " =\t");
-		}
-	}
+            ptr = strtok(NULL, " =\t");
+        }
+    }
 
-	pclose(fp1);
-	
-	errs = -1;
+    pclose(fp1);
+    
+    errs = -1;
 #else
   fp1 = fopen("/proc/net/dev", "r");
   if (fp1 == NULL)
@@ -838,8 +839,8 @@ void ProcUtils::getNetInfo(ApMon& apm, double **vNetIn,
     ind = -1;
     for (i = 0; i < apm.nInterfaces; i++)
       if (strcmp(apm.interfaceNames[i], tmp) == 0) {
-	ind = i;
-	break;
+    ind = i;
+    break;
       }
     
     if (ind < 0) {
@@ -869,7 +870,7 @@ void ProcUtils::getNetInfo(ApMon& apm, double **vNetIn,
     //printf("### bytesReceived %lf lastRecv %lf\n", bytesReceived, 
     // apm.lastBytesReceived[ind]); 
     if (bytesReceived < apm.lastBytesReceived[ind] || bytesSent < 
-	apm.lastBytesSent[ind] || errs < apm.lastNetErrs[ind]) {
+    apm.lastBytesSent[ind] || errs < apm.lastNetErrs[ind]) {
       apm.lastBytesReceived[ind] = bytesReceived;
       apm.lastBytesSent[ind] = bytesSent;
       apm.lastNetErrs[ind] = errs;
@@ -885,10 +886,10 @@ void ProcUtils::getNetInfo(ApMon& apm, double **vNetIn,
     }
     else {
       netIn[ind] = (bytesReceived - apm.lastBytesReceived[ind]) / (crtTime -
-						     apm.lastSysInfoSend);
+                             apm.lastSysInfoSend);
       netIn[ind] /= 1024; /* netIn is measured in KBps */
       netOut[ind] = (bytesSent - apm.lastBytesSent[ind]) / (crtTime - 
-						     apm.lastSysInfoSend);
+                             apm.lastSysInfoSend);
       netOut[ind] /= 1024; /* netOut is measured in KBps */
       /* for network errors give the total number */
       netErrs[ind] = errs; // - apm.lastNetErrs[ind];
@@ -912,7 +913,7 @@ void ProcUtils::getNetInfo(ApMon& apm, double **vNetIn,
 
 int ProcUtils::getNumCPUs() throw(procutils_error) {
 #ifdef WIN32
-	return 0;
+    return 0;
 #else
   int numCPUs = 0;
   char line[MAX_STRING_LEN];
@@ -1025,7 +1026,7 @@ void ProcUtils::getCPUInfo(ApMon& apm) throw(procutils_error) {
  */
 long ProcUtils::getBootTime() throw (procutils_error) {
 #if defined(WIN32) || defined(__SUNOS)
-	return 0;
+    return 0;
 #else
   char line[MAX_STRING_LEN], s[MAX_STRING_LEN];
   long btime = 0;
@@ -1049,7 +1050,7 @@ long ProcUtils::getBootTime() throw (procutils_error) {
 
 double ProcUtils::getUpTime() throw(procutils_error) {
 #ifdef WIN32
-	return 0;
+    return 0;
 #else
   double uptime = 0;
 
@@ -1057,7 +1058,7 @@ double ProcUtils::getUpTime() throw(procutils_error) {
   clock_t ticks;
   struct tms tmp;
   ticks=times(&tmp);
-  uptime = ticks / CLK_TCK;	// in seconds
+  uptime = ticks / CLK_TCK;    // in seconds
 #else
   FILE *fp = fopen("/proc/uptime", "rt");
   if (fp == NULL) {
@@ -1082,7 +1083,7 @@ double ProcUtils::getUpTime() throw(procutils_error) {
 
 int ProcUtils::countOpenFiles(long pid) throw(procutils_error) {
 #if defined(WIN32) || defined(__SUNOS)
-	return 0;
+    return 0;
 #else
   char dirname[50];
   char msg[MAX_STRING_LEN];
@@ -1118,8 +1119,8 @@ int ProcUtils::countOpenFiles(long pid) throw(procutils_error) {
 }
 
 void ProcUtils::getNetstatInfo(ApMon& apm, double nsockets[], 
-				      double tcp_states[]) 
-  throw(runtime_error) {
+                      double tcp_states[]) 
+  throw(std::runtime_error) {
 
   // the states table keeps an entry for each alphabet letter, for efficient 
   // indexing
@@ -1172,72 +1173,72 @@ void ProcUtils::getNetstatInfo(ApMon& apm, double nsockets[],
 
   while (fgets(buf, 200, pf) > 0) {
 
-	  if (strlen(buf)==0){
-		  bTCP = bUDP = bUnix = false;
-	  
-		  continue;
-	  }
+      if (strlen(buf)==0){
+          bTCP = bUDP = bUnix = false;
+      
+          continue;
+      }
 
 
-	  tmp = strtok_r(buf, " \t\n", &pbuf);
+      tmp = strtok_r(buf, " \t\n", &pbuf);
 
-	  if (tmp==NULL){
-		  bTCP = bUDP = bUnix = false;
-	
-		  continue;
-	  }
+      if (tmp==NULL){
+          bTCP = bUDP = bUnix = false;
+    
+          continue;
+      }
 
-	  if (strncmp(tmp, "TCP", 3)==0){
-		  bTCP=true;
-		  fgets(buf, 200, pf);	// skip
-		  fgets(buf, 200, pf);	// headers
+      if (strncmp(tmp, "TCP", 3)==0){
+          bTCP=true;
+          fgets(buf, 200, pf);    // skip
+          fgets(buf, 200, pf);    // headers
 
-		  continue;
-	  }
+          continue;
+      }
 
-	  if (strncmp(tmp, "UDP", 3)==0){
-		  bUDP=true;
-		  fgets(buf, 200, pf);	// skip
-		  fgets(buf, 200, pf);	// headers
+      if (strncmp(tmp, "UDP", 3)==0){
+          bUDP=true;
+          fgets(buf, 200, pf);    // skip
+          fgets(buf, 200, pf);    // headers
 
-		  continue;
-	  }
+          continue;
+      }
 
-	  if (strncmp(tmp, "Active", 6)==0){
-		  bUnix = true;
-		  fgets(buf, 200, pf);	// skip header
+      if (strncmp(tmp, "Active", 6)==0){
+          bUnix = true;
+          fgets(buf, 200, pf);    // skip header
 
-		  continue;
-	  }
-	  
-	  if (!bTCP && !bUDP && !bUnix){
-		  // then what is this? ignore
-		  continue;
-	  }
+          continue;
+      }
+      
+      if (!bTCP && !bUDP && !bUnix){
+          // then what is this? ignore
+          continue;
+      }
 
-	  if (bTCP){
-		  nsockets[SOCK_TCP]++;
+      if (bTCP){
+          nsockets[SOCK_TCP]++;
 
-		  char* last = tmp;
+          char* last = tmp;
 
-		  while ( (tmp=strtok_r(NULL, " \t\n", &pbuf)) ){
-			  last = tmp;
-		  }
-		  
-		  idx = getVectIndex(last, apm.socketStatesMapTCP, N_TCP_STATES);
-		  
-		  if (idx >= 0) {
-			  tcp_states[idx]++;
-		  }
-	  }
+          while ( (tmp=strtok_r(NULL, " \t\n", &pbuf)) ){
+              last = tmp;
+          }
+          
+          idx = getVectIndex(last, apm.socketStatesMapTCP, N_TCP_STATES);
+          
+          if (idx >= 0) {
+              tcp_states[idx]++;
+          }
+      }
 
-	  if (bUDP){
-		  nsockets[SOCK_UDP]++;
-	  }
+      if (bUDP){
+          nsockets[SOCK_UDP]++;
+      }
 
-	  if (bUnix){
-		  nsockets[SOCK_UNIX]++;
-	  }
+      if (bUnix){
+          nsockets[SOCK_UNIX]++;
+      }
   }
   
   nsockets[SOCK_ICM] = RET_ERROR;
@@ -1249,23 +1250,23 @@ void ProcUtils::getNetstatInfo(ApMon& apm, double nsockets[],
 
       /* go to the "State" field */
       for (i = 1; i <= 5; i++)
-	tmp2 = strtok_r(NULL, " \t\n", &pbuf);
+    tmp2 = strtok_r(NULL, " \t\n", &pbuf);
 
       idx = getVectIndex(tmp2, apm.socketStatesMapTCP, N_TCP_STATES);
       if (idx >= 0) {
-	tcp_states[idx]++;
+    tcp_states[idx]++;
       } else {
-	snprintf(msg, 99, "[ getNestatInfo() ] Invalid socket state: %s q", tmp2);
-	logger(WARNING, msg);
+    snprintf(msg, 99, "[ getNestatInfo() ] Invalid socket state: %s q", tmp2);
+    logger(WARNING, msg);
       }
     } else {
       if (strstr(tmp, "udp") == tmp) {
-	nsockets[SOCK_UDP]++;
+    nsockets[SOCK_UDP]++;
       } else {
-	if (strstr(tmp, "unix") == tmp)
-	  nsockets[SOCK_UNIX]++;
-	else if (strstr(tmp, "icm") == tmp)
-	  nsockets[SOCK_ICM]++;
+    if (strstr(tmp, "unix") == tmp)
+      nsockets[SOCK_UNIX]++;
+    else if (strstr(tmp, "icm") == tmp)
+      nsockets[SOCK_ICM]++;
       }
     }
   }

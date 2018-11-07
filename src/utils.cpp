@@ -34,10 +34,14 @@
  * MODIFICATIONS.
  */
 
+
+#include <netdb.h>
 #include "ApMon.h"
 #include "utils.h"
 
-bool apmon_utils::urlModified(char *url, char *lastModified) throw(runtime_error) {
+using namespace std;
+
+bool apmon_utils::urlModified(char *url, char *lastModified) throw(std::runtime_error) {
   char temp_filename[300]; 
   FILE *tmp_file;
   bool lineFound;
@@ -55,9 +59,9 @@ bool apmon_utils::urlModified(char *url, char *lastModified) throw(runtime_error
 #else
   char *tmp = getenv("TEMP");
   if(tmp == NULL)
-	  tmp = getenv("TMP");
+      tmp = getenv("TMP");
   if(tmp == NULL)
-	  tmp = "c:";
+      tmp = "c:";
   snprintf(temp_filename, 299, "%s\\apmon_http%ld", tmp, mypid);
 #endif
   /* get the HTTP header and put it in a temporary file */
@@ -106,7 +110,7 @@ bool apmon_utils::urlModified(char *url, char *lastModified) throw(runtime_error
 }  
 
 int apmon_utils::httpRequest(char *url, const char *reqType, char *temp_filename) 
-throw(runtime_error) {
+throw(std::runtime_error) {
   // the server from which we get the configuration file
   char hostname[MAX_STRING_LEN]; 
   // the name of the remote file
@@ -141,7 +145,8 @@ throw(runtime_error) {
   strncat( request, hostname, MAX_STRING_LEN-strlen(request)-1);
   strncat( request, "\r\n\r\n", MAX_STRING_LEN-strlen(request)-1);
 
-  h = gethostbyname(hostname);
+  const char* hostname_const = hostname;
+  h = gethostbyname(hostname_const);
   if(h==NULL) {
     free(request);
     snprintf(msg, MAX_STRING_LEN-1, "[ httpRequest() ] Unknown host: %s ", hostname);
@@ -163,9 +168,9 @@ throw(runtime_error) {
   optval.tv_sec = 10;
   optval.tv_usec = 0;
   //setsockopt(sd, SOL_SOCKET, SO_SNDTIMEO, (char *) &optval, 
-  //		sizeof(optval));
+  //        sizeof(optval));
   setsockopt(sd, SOL_SOCKET, SO_RCVTIMEO, (char *) &optval, 
-			sizeof(optval));
+            sizeof(optval));
   
   localAddr.sin_family = AF_INET;
   localAddr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -180,7 +185,7 @@ throw(runtime_error) {
     throw runtime_error(msg);
   }
   */
-				
+                
   // connect to the server
   rc = connect(sd, (struct sockaddr *) &servAddr, sizeof(servAddr));
   if(rc<0) {
@@ -188,7 +193,7 @@ throw(runtime_error) {
 #ifndef WIN32
     close(sd);
 #else
-	closesocket(sd);
+    closesocket(sd);
 #endif
     throw runtime_error("[ httpRequest() ] Cannot connect to http server");
   }
@@ -197,9 +202,9 @@ throw(runtime_error) {
   rc = send(sd, request, strlen(request), 0);
   if(rc<0) {  
 #ifndef WIN32
-	close(sd);
+    close(sd);
 #else
-	closesocket(sd);
+    closesocket(sd);
 #endif
     free(request);
     throw runtime_error("[ httpRequest() ] Cannot send the request to the http server");
@@ -213,7 +218,7 @@ throw(runtime_error) {
 #ifndef WIN32
     close(sd);
 #else
-	closesocket(sd);
+    closesocket(sd);
 #endif
     throw runtime_error("[ httpRequest() ] Unable to open for writing temporary file");
   }
@@ -242,44 +247,45 @@ throw(runtime_error) {
   return totalSize;
 }
 
-char *apmon_utils::findIP(char *address) throw(runtime_error) {
+char *apmon_utils::findIP(char *address) throw(std::runtime_error) {
   int isIP = 1;
   char *destIP, *s;
   struct in_addr addr;
   unsigned int j;
   bool ipFound;
 
-  for (j = 0; j < strlen(address); j++) 
+  for (j = 0; j < strlen(address); j++)
       if (isalpha(address[j])) {
-	// if we found a letter, this is not an IP address
-	isIP = 0;
-	break;
+    // if we found a letter, this is not an IP address
+    isIP = 0;
+    break;
       }
-     
+
     if (!isIP) {  // the user provided a hostname, find the IP
-      struct hostent *he = gethostbyname(address);
+      const char* address_const = address;
+      struct hostent *he = gethostbyname(address_const);
       if (he == NULL) {
-	char tmp_msg[128];
-	snprintf(tmp_msg, 127, "[ findIP() ] Invalid destination address %s", address);
-	throw runtime_error(tmp_msg);
-      }
+        char tmp_msg[128];
+        snprintf(tmp_msg, 127, "[ findIP() ] Invalid destination address %s", address);
+        throw runtime_error(tmp_msg);
+        }
       j = 0;
-      /* get from the list the first IP address 
-	 (which is not a loopback one) */
+      /* get from the list the first IP address
+     (which is not a loopback one) */
       ipFound = false;
       while ((he -> h_addr_list)[j] != NULL) {
-	memcpy(&(addr.s_addr), (he -> h_addr_list)[j], 4);
-	s = inet_ntoa(addr);
-	if (strcmp(s, "127.0.0.1") != 0) {
-	  destIP = strdup(s);
-	  ipFound = true;
-	  break;
-	}
-	j++;
+    memcpy(&(addr.s_addr), (he -> h_addr_list)[j], 4);
+    s = inet_ntoa(addr);
+    if (strcmp(s, "127.0.0.1") != 0) {
+      destIP = strdup(s);
+      ipFound = true;
+      break;
+    }
+    j++;
       }
       if (!ipFound) {
-	destIP = strdup("127.0.0.1");
-	fprintf(stderr, "The destination for datagrams is localhost\n");
+    destIP = strdup("127.0.0.1");
+    fprintf(stderr, "The destination for datagrams is localhost\n");
       }
     
     } else // the string was an IP address
@@ -290,37 +296,37 @@ char *apmon_utils::findIP(char *address) throw(runtime_error) {
 
 
 void apmon_utils::parse_URL(char *url, char *hostname, int *port, char *identifier) 
-throw(runtime_error) {
+throw(std::runtime_error) {
     char protocol[MAX_STRING_LEN], scratch[MAX_STRING_LEN], *ptr=0, *nptr=0;
     char msg[MAX_STRING_LEN];
 
     strncpy(scratch, url, MAX_STRING_LEN-1);
     ptr = (char *)strchr(scratch, ':');
     if (!ptr)
-	throw runtime_error("[ parse_URL() ] Wrong url: no protocol specified");
+    throw runtime_error("[ parse_URL() ] Wrong url: no protocol specified");
 
     strcpy(ptr, "\0");
     strncpy(protocol, scratch, MAX_STRING_LEN-1);
     if (strcmp(protocol, "http")) {
-		snprintf(msg, MAX_STRING_LEN-1, "[ parse_URL() ] Wrong protocol in URL: %s", protocol);
-		throw runtime_error(msg);
+        snprintf(msg, MAX_STRING_LEN-1, "[ parse_URL() ] Wrong protocol in URL: %s", protocol);
+        throw runtime_error(msg);
     }
 
     strncpy(scratch, url, MAX_STRING_LEN-1);
     ptr = (char *)strstr(scratch, "//");
     if (!ptr) {
-		throw runtime_error("[ parse_URL() ] Wrong url: no server specified");
+        throw runtime_error("[ parse_URL() ] Wrong url: no server specified");
     }
     ptr += 2;
 
     strncpy(hostname, ptr, MAX_STRING_LEN-1);
     nptr = (char *)strchr(ptr, ':');
     if (!nptr) {
-		*port = 80; /* use the default HTTP port number */
-		nptr = (char *)strchr(hostname, '/');
-    } else {	
-		sscanf(nptr, ":%d", port);
-		nptr = (char *)strchr(hostname, ':');
+        *port = 80; /* use the default HTTP port number */
+        nptr = (char *)strchr(hostname, '/');
+    } else {    
+        sscanf(nptr, ":%d", port);
+        nptr = (char *)strchr(hostname, ':');
     }
 
     if (nptr)
@@ -328,7 +334,7 @@ throw(runtime_error) {
 
     nptr = (char *)strchr(ptr, '/');
     if (!nptr) {
-		throw runtime_error("[ parse_URL() ] Wrong url: no file specified");
+        throw runtime_error("[ parse_URL() ] Wrong url: no file specified");
     }
     
     strncpy(identifier, nptr, MAX_STRING_LEN-1);
@@ -361,7 +367,7 @@ char *apmon_utils::trimString(char *s) {
   // find the position of the last non-space character in the string
   for (i = strlen(s) - 1; i >= 0; i--)
     if (!isspace(s[i]))
-	break;
+    break;
   lastpos = i; 
 
   for (i = firstpos; i <= lastpos; i++)
@@ -391,9 +397,9 @@ int apmon_utils::xdrSize(int type, char *value) {
     } else {
       size = strlen(value) + 4;
       /* the length of the XDR representation must be a multiple of 4,
-	 so there might be some extra bytes added*/
+     so there might be some extra bytes added*/
       if (size % 4 != 0)
-	size += (4 - size % 4);
+    size += (4 - size % 4);
       return size;
     }
   }
@@ -419,7 +425,7 @@ int apmon_utils::sizeEval(int type, char *value) {
 }
 
 void apmon_utils::logParameters(int level, int nParams, char **paramNames, 
-		     int *valueTypes, char **paramValues) {
+             int *valueTypes, char **paramValues) {
   int i;
   char typeNames[][15] = {"XDR_STRING", "", "XDR_INT32", "", "XDR_REAL32",  "XDR_REAL64"};
   char logmsg[MAX_STRING_LEN], val[MAX_STRING_LEN];
@@ -428,7 +434,7 @@ void apmon_utils::logParameters(int level, int nParams, char **paramNames,
 
   for (i = 0; i < nParams; i++) {
     if (paramNames[i] == NULL || (valueTypes[i] == XDR_STRING &&
-				  paramValues[i] == NULL))
+                  paramValues[i] == NULL))
       continue;
     snprintf(logmsg, MAX_STRING_LEN-1, "%s (%s) ", paramNames[i], typeNames[valueTypes[i]]);
     //printf("%s () ", paramNames[i]);
@@ -453,7 +459,7 @@ void apmon_utils::logParameters(int level, int nParams, char **paramNames,
     remaining -= strlen(val);
     
     if (remaining<=0)
-    	break;
+        break;
   }
 }
 
@@ -508,7 +514,7 @@ void apmon_utils::logger(int msgLevel, const char *msg, int newLevel) {
 #ifndef WIN32
     pthread_mutex_init(&logger_mutex, NULL);
 #else
-	logger_mutex = CreateMutex(NULL, FALSE, NULL);
+    logger_mutex = CreateMutex(NULL, FALSE, NULL);
 #endif
     firstTime = false;
   }
@@ -531,7 +537,7 @@ void apmon_utils::logger(int msgLevel, const char *msg, int newLevel) {
   } else {
     if (msgLevel >= 0 && msgLevel <= 4) {
       if (msgLevel <= loglevel)
-	printf("[%s] [%s] %s\n",time_s, levels[msgLevel], msg);
+    printf("[%s] [%s] %s\n",time_s, levels[msgLevel], msg);
     } else
       printf("[WARNING] Invalid logging level %d!\n", msgLevel);
   }

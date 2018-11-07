@@ -65,11 +65,11 @@
 #define SYS_UPTIME           22
 #define SYS_NET_SOCKETS      23
 #define SYS_NET_TCP_DETAILS  24
-#define SYS_CPU_IOWAIT	     25
-#define SYS_CPU_IRQ	     26
-#define SYS_CPU_SOFTIRQ	     27
-#define SYS_CPU_STEAL	     28
-#define SYS_CPU_GUEST	     29
+#define SYS_CPU_IOWAIT         25
+#define SYS_CPU_IRQ         26
+#define SYS_CPU_SOFTIRQ         27
+#define SYS_CPU_STEAL         28
+#define SYS_CPU_GUEST         29
 
 //GENERIC_*
 #define GEN_HOSTNAME         0

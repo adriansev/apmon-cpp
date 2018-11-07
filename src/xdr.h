@@ -48,7 +48,7 @@
  */
 
 /** This is only for WINDOWS. Linux and Mac already have this in <rpc/rpc.h> */
-#ifdef WIN32	
+#ifdef WIN32    
 
 #ifndef __XDR_HEADER__
 #define __XDR_HEADER__

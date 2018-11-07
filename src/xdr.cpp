@@ -421,7 +421,7 @@ xdrmem_destroy(void *xdrs)
 static bool_t
 xdrmem_getlong(void *xdrsv, long *lp)
 {
-		register XDR *xdrs = (XDR *)xdrsv;
+        register XDR *xdrs = (XDR *)xdrsv;
         if ((xdrs->x_handy -= sizeof(long)) < 0)
                 return (FALSE);
         *lp = (long)ntohl((u_long)(*((long *)(xdrs->x_private))));
@@ -433,7 +433,7 @@ static bool_t
 xdrmem_putlong(void *xdrsv, long *lp)
 {
 
-		register XDR *xdrs = (XDR *)xdrsv;
+        register XDR *xdrs = (XDR *)xdrsv;
         if ((xdrs->x_handy -= sizeof(long)) < 0)
                 return (FALSE);
         *(long *)xdrs->x_private = (long)htonl((u_long)(*lp));
@@ -444,7 +444,7 @@ xdrmem_putlong(void *xdrsv, long *lp)
 static bool_t
 xdrmem_getbytes(void *xdrsv, void *addr, register int len)
 {
-		register XDR *xdrs = (XDR *)xdrsv;
+        register XDR *xdrs = (XDR *)xdrsv;
         if ((xdrs->x_handy -= len) < 0)
                 return (FALSE);
         memcpy(addr, xdrs->x_private, len);
@@ -455,7 +455,7 @@ xdrmem_getbytes(void *xdrsv, void *addr, register int len)
 static bool_t
 xdrmem_putbytes(void *xdrsv, void *addr, register int len)
 {
-		register XDR *xdrs = (XDR *)xdrsv;
+        register XDR *xdrs = (XDR *)xdrsv;
         if ((xdrs->x_handy -= len) < 0)
                 return (FALSE);
         memcpy(xdrs->x_private, addr, len);
@@ -466,14 +466,14 @@ xdrmem_putbytes(void *xdrsv, void *addr, register int len)
 static u_int
 xdrmem_getpos(void *xdrsv)
 {
-		register XDR *xdrs = (XDR *)xdrsv;
+        register XDR *xdrs = (XDR *)xdrsv;
         return ((u_int)xdrs->x_private - (u_int)xdrs->x_base);
 }
 
 static bool_t
 xdrmem_setpos(void *xdrsv, int pos)
 {
-		register XDR *xdrs = (XDR *)xdrsv;
+        register XDR *xdrs = (XDR *)xdrsv;
         register caddr_t newaddr = xdrs->x_base + pos;
         register caddr_t lastaddr = xdrs->x_private + xdrs->x_handy;
 
@@ -488,7 +488,7 @@ static long *
 xdrmem_inline(void *xdrsv, int len)
 {
         long *buf = 0;
-		register XDR *xdrs = (XDR *)xdrsv;
+        register XDR *xdrs = (XDR *)xdrsv;
         if (xdrs->x_handy >= len) {
                 xdrs->x_handy -= len;
                 buf = (long *) xdrs->x_private;

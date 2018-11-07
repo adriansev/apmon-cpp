@@ -45,16 +45,14 @@
 #include <sys/wait.h>
 #endif
 
-using namespace std;
- 
 /** Used when throwing exceptions from the proc_utils functions. When a
  * proc_utils_error is being thrown, a certain parameter could not be
  * obtained from proc/ and ApMon will not make further attempts to read
  * that parameter (if the autoDisable flag is on). 
  */
-class procutils_error : public runtime_error {
+class procutils_error : public std::runtime_error {
  public:
-  procutils_error(const char *msg) : runtime_error(msg) {}
+  procutils_error(const char *msg) : std::runtime_error(msg) {}
 };
 
 
@@ -65,21 +63,21 @@ class ProcUtils {
       cpu_usage and stores them in the output parameters cpuUsr, cpuSys,...
   */
   static void getCPUUsage(ApMon& apm, double& cpuUsage, 
-			       double& cpuUsr, double& cpuSys, 
-			       double& cpuNice, double& cpuIdle,
-			       double& cpuIOWait, double& cpuIRQ,
-			       double& cpuSoftIRQ, double& cpuSteal,
-			       double& cpuGuest,
-			       int numCPUs)
-  throw (runtime_error, procutils_error);
+                   double& cpuUsr, double& cpuSys, 
+                   double& cpuNice, double& cpuIdle,
+                   double& cpuIOWait, double& cpuIRQ,
+                   double& cpuSoftIRQ, double& cpuSteal,
+                   double& cpuGuest,
+                   int numCPUs)
+  throw (std::runtime_error, procutils_error);
 
    /** Calculates the parameters pages_in, pages_out, swap_in, swap_out,
       cpu_usage and stores them in the output parameters pagesIn, pagesOut,...
    */
   static void getSwapPages(ApMon& apm, double& pagesIn, 
-			       double& pagesOut, double& swapIn, 
-			     double& swapOut) 
-    throw (runtime_error, procutils_error);
+                   double& pagesOut, double& swapIn, 
+                 double& swapOut) 
+    throw (std::runtime_error, procutils_error);
 
   /**
    * Obtains the CPU load in the last 1, 5 and 15 mins and the number of 
@@ -87,7 +85,7 @@ class ProcUtils {
    * as parameters.
    */
   static void getLoad(double& load1, double& load5, double& load15, 
-	       double& processes) throw(procutils_error);
+           double& processes) throw(procutils_error);
 
   /**
    * Obtains statistics about the total number of processes and
@@ -102,7 +100,7 @@ class ProcUtils {
    *   Z a defunct ("zombie") process
    */
   static void getProcesses(double& processes, double states[]) 
-    throw(runtime_error); 
+    throw(std::runtime_error); 
 
   /**
    * Obtains the total amount of memory and the total amount of swap (in KB)
@@ -116,7 +114,7 @@ class ProcUtils {
    * them in the variables given as parameters.
    */
   static void getMemUsed(double& usedMem, double&freeMem, double &usedSwap,
-		  double& freeSwap) 
+          double& freeSwap) 
     throw(procutils_error);
 
   /**
@@ -142,8 +140,8 @@ class ProcUtils {
    * interface. 
    */  
   static void getNetInfo(ApMon& apm, double **vNetIn, double **vNetOut, 
-		  double **vNetErrs) 
-    throw(runtime_error, procutils_error);
+          double **vNetErrs) 
+    throw(std::runtime_error, procutils_error);
 
   /**
    * Obtains information about the currently opened sockets.
@@ -153,7 +151,7 @@ class ProcUtils {
    * of TCP sockets in each possible state (ESTABLISHED, LISTEN, ...).
    */
   static void getNetstatInfo(ApMon& apm, double nsockets[], double 
-			     tcp_states[]) throw(runtime_error);
+                 tcp_states[]) throw(std::runtime_error);
 
   /**
    * Returns the number of CPUs in the system.

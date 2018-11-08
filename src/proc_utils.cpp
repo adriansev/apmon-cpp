@@ -44,6 +44,7 @@
 #include <dirent.h>
 #endif
 
+using namespace std;
 using namespace apmon_utils;
 
 void ProcUtils::getCPUUsage(ApMon& apm, double& cpuUsage, 

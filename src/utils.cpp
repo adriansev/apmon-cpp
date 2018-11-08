@@ -37,6 +37,8 @@
 #include "ApMon.h"
 #include "utils.h"
 
+using namespace std;
+
 bool apmon_utils::urlModified(char *url, char *lastModified) throw(runtime_error) {
   char temp_filename[300]; 
   FILE *tmp_file;

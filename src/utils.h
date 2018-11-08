@@ -42,19 +42,19 @@
 #pragma warning ( disable : 4290 )
 #endif
 
-#ifndef apmon_utils_h
-#define apmon_utils_h
-
 #include <stdexcept>
 #include <ctype.h>
+#include <netdb.h>
+#include <unistd.h>
+
+#ifndef apmon_utils_h
+#define apmon_utils_h
 
 #define FATAL 0 /**< Logging level with minimum number of messages. */
 #define WARNING 1 /**< Intermediate logging level. */
 #define INFO 2 /**< Intermediate logging level. */
 #define FINE 3 /**< Logging level with detailed information. */
 #define DEBUG 4 /**< Logging level for debugging. */
-
-using namespace std;
 
 namespace apmon_utils {
   /**
@@ -64,7 +64,7 @@ namespace apmon_utils {
    * @param lastModified The "Last-Modified" header that was received last time
    * the page was requested.
    */
-  bool urlModified(char *url, char *lastModified) throw(runtime_error);
+   bool urlModified(char *url, char *lastModified) throw(std::runtime_error);
 
  /**
   * Performs a HTTP request and puts the result into a temporary file.
@@ -74,13 +74,13 @@ namespace apmon_utils {
   * @return The size of the response received from the server, in bytes.
   */
   int httpRequest(char *url, const char *reqType, char *temp_filename) 
-    throw(runtime_error);
+    throw(std::runtime_error);
 
  /**
   * If "address" is a hostname, it returns the corresponding IP address;
   * if "address" is an IP address, it just returns a copy of the address.
   */
-  char *findIP(char *address) throw(runtime_error);
+  char *findIP(char *address) throw(std::runtime_error);
 
 
  /**
@@ -92,7 +92,7 @@ namespace apmon_utils {
   * @param identifier The determined file name (also an output parameter).
   */
   void parse_URL(char *url, char *hostname, int *port, char *identifier)
-    throw(runtime_error);
+    throw(std::runtime_error);
 
  /**
   * Frees the memory for a 2-dimensional character array.
@@ -131,7 +131,7 @@ namespace apmon_utils {
    * Logs the parameters included in a datagram.
    */
   void logParameters(int level, int nParams, char **paramNames, 
-		     int *valueTypes, char **paramValues);
+             int *valueTypes, char **paramValues);
 
   /**
    * Verifies whether an IP address is private.

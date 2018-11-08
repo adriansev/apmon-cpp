@@ -40,6 +40,7 @@
 #include "proc_utils.h"
 #include "monitor_utils.h"
 
+using namespace std;
 using namespace apmon_utils;
 using namespace apmon_mon_utils;
 
@@ -52,7 +53,7 @@ char boolStrings[][10] = {"false", "true"};
 //========= Implementations of the functions ===================
 
 ApMon::ApMon(char *initsource) 
-  throw(runtime_error) {
+  throw(std::runtime_error) {
 
   if (initsource == NULL)
     throw runtime_error("[ ApMon() ]  No conf file/URL provided");
@@ -76,7 +77,7 @@ ApMon::ApMon(char *initsource)
 }
 
 void ApMon::initialize(char *filename, bool firstTime) 
-  throw(runtime_error) {
+  throw(std::runtime_error) {
 
   char *destAddresses[MAX_N_DESTINATIONS];
   int destPorts[MAX_N_DESTINATIONS];
@@ -90,7 +91,7 @@ void ApMon::initialize(char *filename, bool firstTime)
     loadFile(filename, &nDest, destAddresses, destPorts, destPasswds);
 
     arrayInit(nDest, destAddresses, destPorts, destPasswds, firstTime);
-  } catch (runtime_error& err) {
+  } catch (std::runtime_error& err) {
     if (firstTime)
       throw err;
     else {
@@ -111,8 +112,8 @@ void ApMon::initialize(char *filename, bool firstTime)
 }
 
 void ApMon::loadFile(char *filename, int *nDestinations, char **destAddresses, 
-		     int *destPorts, char **destPasswds)
-  throw(runtime_error) {
+             int *destPorts, char **destPasswds)
+  throw(std::runtime_error) {
   FILE *f;
   char msg[100];
  
@@ -131,12 +132,12 @@ void ApMon::loadFile(char *filename, int *nDestinations, char **destAddresses,
   fclose(f);
 }
 
-ApMon::ApMon(int nDestinations, char **destinationsList) throw(runtime_error){
+ApMon::ApMon(int nDestinations, char **destinationsList) throw(std::runtime_error){
   constructFromList(nDestinations, destinationsList);
 }
 
 void ApMon::constructFromList(int nDestinations, char **destinationsList)
-  throw(runtime_error) {
+  throw(std::runtime_error) {
   int i;
 
   if (destinationsList == NULL) 
@@ -163,7 +164,7 @@ void ApMon::constructFromList(int nDestinations, char **destinationsList)
 }
 
 void ApMon::initialize(int nDestinations, char **destinationsList,
-		       bool firstTime) throw(runtime_error) { 
+               bool firstTime) throw(std::runtime_error) { 
   char *destAddresses[MAX_N_DESTINATIONS];
   int destPorts[MAX_N_DESTINATIONS];
   char *destPasswds[MAX_N_DESTINATIONS];
@@ -183,29 +184,29 @@ void ApMon::initialize(int nDestinations, char **destinationsList,
   for (i = 0; i < nDestinations; i++) {
     try { 
       if (strstr(destinationsList[i], "http") == destinationsList[i])
-	getDestFromWeb(destinationsList[i], &cnt, 
-		       destAddresses, destPorts, destPasswds, confURLs);
+    getDestFromWeb(destinationsList[i], &cnt, 
+               destAddresses, destPorts, destPasswds, confURLs);
       else 
-	addToDestinations(destinationsList[i], &cnt, 
-			destAddresses, destPorts, destPasswds);
+    addToDestinations(destinationsList[i], &cnt, 
+            destAddresses, destPorts, destPasswds);
 
-    } catch (runtime_error &e) {
+    } catch (std::runtime_error &e) {
       snprintf(errmsg, 199, "[ initialize() ] Error while loading the configuration: %s", e.what());
       logger(WARNING, errmsg);
       if (!firstTime) {
-	for (i = 0; i < cnt; i++) {
-	  free(destAddresses[i]);
-	  free(destPasswds[i]);
-	}
-	logger(WARNING, "Configuration not reloaded successfully. Keeping the previous one.");
-	return; 
+    for (i = 0; i < cnt; i++) {
+      free(destAddresses[i]);
+      free(destPasswds[i]);
+    }
+    logger(WARNING, "Configuration not reloaded successfully. Keeping the previous one.");
+    return; 
       }     
     }  // catch
   }  // for
 
   try {
     arrayInit(cnt, destAddresses, destPorts, destPasswds, firstTime);
-  } catch (runtime_error& err) {
+  } catch (std::runtime_error& err) {
     if (firstTime)
       throw err;
     else {
@@ -225,7 +226,7 @@ void ApMon::initialize(int nDestinations, char **destinationsList,
 }
 
 void ApMon::addToDestinations(char *line, int *nDestinations, 
-	       char *destAddresses[], int destPorts[], char *destPasswds[]) {
+           char *destAddresses[], int destPorts[], char *destPasswds[]) {
   char *addr, *port, *passwd;
   char *sep1 = (char *)" \t";
   char *sep2 = (char *)":";
@@ -258,7 +259,7 @@ void ApMon::addToDestinations(char *line, int *nDestinations,
   
 void ApMon::getDestFromWeb(char *url, int *nDestinations, 
   char *destAddresses[], int destPorts[], char *destPasswds[],
-			   ConfURLs& confURLs) throw(runtime_error) {
+               ConfURLs& confURLs) throw(std::runtime_error) {
   char temp_filename[300];
   FILE *tmp_file;
   char *line, *ret, *tmp = NULL;
@@ -272,9 +273,9 @@ void ApMon::getDestFromWeb(char *url, int *nDestinations,
 #else
   char *tmpp = getenv("TEMP");
   if(tmpp == NULL)
-	  tmpp = getenv("TMP");
+      tmpp = getenv("TMP");
   if(tmpp == NULL)
-	  tmpp = "c:";
+      tmpp = "c:";
   snprintf(temp_filename, 299, "%s\\apmon_webconf%ld", tmpp, mypid);
 #endif 
   /* get the configuration file from web and put it in a temporary file */
@@ -337,7 +338,7 @@ void ApMon::getDestFromWeb(char *url, int *nDestinations,
 
   try {
     parseConf(tmp_file, nDestinations, destAddresses, destPorts, 
-	      destPasswds);
+          destPasswds);
   } catch (...) {
     fclose(tmp_file);
     unlink(temp_filename);
@@ -350,23 +351,23 @@ void ApMon::getDestFromWeb(char *url, int *nDestinations,
 
 
 ApMon::ApMon(int nDestinations, char **destAddresses, int *destPorts, 
-	     char **destPasswds) 
-throw(runtime_error) {
+         char **destPasswds) 
+throw(std::runtime_error) {
   initMonitoring();
 
   arrayInit(nDestinations, destAddresses, destPorts, destPasswds);
 }
 
 void ApMon::arrayInit(int nDestinations, char **destAddresses, 
-		      int *destPorts, char **destPasswds) 
-  throw(runtime_error) {
-	arrayInit(nDestinations, destAddresses, destPorts, destPasswds, true);
+              int *destPorts, char **destPasswds) 
+  throw(std::runtime_error) {
+    arrayInit(nDestinations, destAddresses, destPorts, destPasswds, true);
 }
 
 
 void ApMon::arrayInit(int nDestinations, char **destAddresses, int *destPorts,
-		      char **destPasswds, bool firstTime) 
-throw(runtime_error) {
+              char **destPasswds, bool firstTime) 
+throw(std::runtime_error) {
   int i, j;
   int ret;
   char *ipAddr, logmsg[100];
@@ -384,7 +385,7 @@ throw(runtime_error) {
 
     this -> nMonJobs = 0;
     this -> monJobs = (MonitoredJob *)malloc(MAX_MONITORED_JOBS * 
-					    sizeof(MonitoredJob));
+                        sizeof(MonitoredJob));
    
     try {
       this -> numCPUs = ProcUtils::getNumCPUs();
@@ -397,7 +398,7 @@ throw(runtime_error) {
     this -> nInterfaces = 0;
     try {
       ProcUtils::getNetworkInterfaces(this -> nInterfaces, 
-				     this -> interfaceNames);
+                     this -> interfaceNames);
     } catch (procutils_error &err) {
       logger(WARNING, err.what());
       this -> nInterfaces = 0;
@@ -426,50 +427,50 @@ throw(runtime_error) {
     } else {
       for (i = 0; i < this -> nInterfaces; i++) {
     struct ifreq ifr;
-	memset(&ifr, 0, sizeof(ifr));
-	strncpy(ifr.ifr_name, this -> interfaceNames[i], sizeof(ifr.ifr_name) - 1); 
-	char ip[4], tmp_s[50];
+    memset(&ifr, 0, sizeof(ifr));
+    strncpy(ifr.ifr_name, this -> interfaceNames[i], sizeof(ifr.ifr_name) - 1); 
+    char ip[4], tmp_s[50];
 
-	if(ioctl(sockd, SIOCGIFADDR, &ifr)<0){
-	  snprintf(logmsg, 99, "Cannot get the address of %s", this->interfaceNames[i]);
-	  logger(WARNING, logmsg);
-	  continue;	//????????
-	}
+    if(ioctl(sockd, SIOCGIFADDR, &ifr)<0){
+      snprintf(logmsg, 99, "Cannot get the address of %s", this->interfaceNames[i]);
+      logger(WARNING, logmsg);
+      continue;    //????????
+    }
 
 #if defined(__APPLE__) || defined (__SUNOS)
-	memcpy(ip, ifr.ifr_addr.sa_data+2, 4);
+    memcpy(ip, ifr.ifr_addr.sa_data+2, 4);
 #else
-	memcpy(ip, ifr.ifr_hwaddr.sa_data+2, 4);
+    memcpy(ip, ifr.ifr_hwaddr.sa_data+2, 4);
 #endif
 
-	strncpy(tmp_s, inet_ntoa(*(struct in_addr *)ip), 49);
-	snprintf(logmsg, 99, "Found local IP address: %s", tmp_s);
-	logger(FINE, logmsg);
-	if (strcmp(tmp_s, "127.0.0.1") != 0 && !havePublicIP) {
-	  strncpy(this -> myIP, tmp_s, MAX_STRING_LEN-1);
-	  if (!isPrivateAddress(tmp_s))
-	    havePublicIP = true;
-	}
-	strncpy(this -> allMyIPs[this -> numIPs], tmp_s, MAX_STRING_LEN-1);
-	this -> numIPs++;
+    strncpy(tmp_s, inet_ntoa(*(struct in_addr *)ip), 49);
+    snprintf(logmsg, 99, "Found local IP address: %s", tmp_s);
+    logger(FINE, logmsg);
+    if (strcmp(tmp_s, "127.0.0.1") != 0 && !havePublicIP) {
+      strncpy(this -> myIP, tmp_s, MAX_STRING_LEN-1);
+      if (!isPrivateAddress(tmp_s))
+        havePublicIP = true;
+    }
+    strncpy(this -> allMyIPs[this -> numIPs], tmp_s, MAX_STRING_LEN-1);
+    this -> numIPs++;
       }
     }
 #else
-	struct hostent *hptr;
+    struct hostent *hptr;
     if ((hptr = gethostbyname(myHostname))!= NULL) {
       i = 0;
-	  struct in_addr addr;
-	  while ((hptr -> h_addr_list)[i] != NULL) {
-	    memcpy(&(addr.s_addr), (hptr -> h_addr_list)[i], 4);
+      struct in_addr addr;
+      while ((hptr -> h_addr_list)[i] != NULL) {
+        memcpy(&(addr.s_addr), (hptr -> h_addr_list)[i], 4);
         ipAddr = inet_ntoa(addr);
-	    if (strcmp(ipAddr, "127.0.0.1") != 0) {
-	      strncpy(this -> myIP, ipAddr, MAX_STRING_LEN-1);
-	      if (!isPrivateAddress(ipAddr))
-		    break;
-		}
-	    i++;
-	  }
-	}
+        if (strcmp(ipAddr, "127.0.0.1") != 0) {
+          strncpy(this -> myIP, ipAddr, MAX_STRING_LEN-1);
+          if (!isPrivateAddress(ipAddr))
+            break;
+        }
+        i++;
+      }
+    }
 #endif
 
     this -> sysMonCluster = strdup("ApMon_SysMon");
@@ -516,7 +517,7 @@ throw(runtime_error) {
   for (i = 0; i < nDestinations; i++) {
     try {
       ipAddr = findIP(destAddresses[i]);
-    } catch (runtime_error &err) {
+    } catch (std::runtime_error &err) {
       logger(FATAL, err.what());
       continue;
     }
@@ -525,8 +526,8 @@ throw(runtime_error) {
     found = false;
     for (j = 0; j < tmpNDestinations; j++) {
       if (!strcmp(ipAddr, tmpAddresses[j])) {
-	found = true;
-	break;
+    found = true;
+    break;
       }
     }
 
@@ -573,7 +574,7 @@ ApMon::~ApMon() {
   if (bkThreadStarted) {
     if (getJobMonitoring()) {
       /* send a datagram with job monitoring information which covers
-	 the last time interval */
+     the last time interval */
       sendJobInfo();
     }
   }
@@ -621,15 +622,15 @@ void ApMon::freeConf() {
 }
 
 int ApMon::sendParameters(char *clusterName, char *nodeName,
-	       int nParams, char **paramNames, int *valueTypes, 
-			 char **paramValues) throw(runtime_error){
+           int nParams, char **paramNames, int *valueTypes, 
+             char **paramValues) throw(std::runtime_error){
  return sendTimedParameters(clusterName, nodeName, nParams, 
-			    paramNames, valueTypes, paramValues, -1);
+                paramNames, valueTypes, paramValues, -1);
 }
 
 int ApMon::sendTimedParameters(char *clusterName, char *nodeName,
-	       int nParams, char **paramNames, int *valueTypes, 
-	       char **paramValues, int timestamp) throw(runtime_error){
+           int nParams, char **paramNames, int *valueTypes, 
+           char **paramValues, int timestamp) throw(std::runtime_error){
   int i;
   int ret, ret1, ret2;
   char msg[200], buf2[MAX_HEADER_LENGTH+4], newBuf[MAX_DGRAM_SIZE], crtAddr[128];
@@ -645,7 +646,7 @@ int ApMon::sendTimedParameters(char *clusterName, char *nodeName,
      pthread_mutex_unlock(&mutex);
      return RET_NOT_SENT;
   }
-		
+        
   if (clusterName != NULL) { // don't keep the cached values for cluster name
     // and node name
     free(this -> clusterName);
@@ -671,7 +672,7 @@ int ApMon::sendTimedParameters(char *clusterName, char *nodeName,
   /* try to encode the parameters */
   try {
     encodeParams(nParams, paramNames, valueTypes, paramValues, timestamp);
-  } catch (runtime_error& err) {
+  } catch (std::runtime_error& err) {
     pthread_mutex_unlock(&mutex);
     throw err;
   }
@@ -714,7 +715,7 @@ int ApMon::sendTimedParameters(char *clusterName, char *nodeName,
 
     if (!ret || !ret1 || !ret2) {
       free(headerTmp);
-	  pthread_mutex_unlock(&mutex);
+      pthread_mutex_unlock(&mutex);
       throw runtime_error("[ sendTimedParameters() ] XDR encoding error for the header");
     }
 
@@ -725,7 +726,7 @@ int ApMon::sendTimedParameters(char *clusterName, char *nodeName,
 
     /* send the buffer */
     ret = sendto(sockfd, newBuf, dgramSize + buf2Length, 0, 
-		 (struct sockaddr *)&destAddr, sizeof(destAddr));
+         (struct sockaddr *)&destAddr, sizeof(destAddr));
     if (ret == RET_ERROR) {
       free(headerTmp);
       pthread_mutex_unlock(&mutex);
@@ -759,52 +760,52 @@ int ApMon::sendTimedParameters(char *clusterName, char *nodeName,
 
 
 int ApMon::sendParameter(char *clusterName, char *nodeName,
-			char *paramName, int valueType, char *paramValue) 
- throw(runtime_error){
+            char *paramName, int valueType, char *paramValue) 
+ throw(std::runtime_error){
 
   return sendParameters(clusterName, nodeName, 1, &paramName, 
-			      &valueType, &paramValue);
+                  &valueType, &paramValue);
 }
 
 int ApMon::sendTimedParameter(char *clusterName, char *nodeName,
-	      char *paramName, int valueType, char *paramValue, int timestamp) 
- throw(runtime_error){
+          char *paramName, int valueType, char *paramValue, int timestamp) 
+ throw(std::runtime_error){
 
   return sendTimedParameters(clusterName, nodeName, 1, &paramName, 
-			      &valueType, &paramValue, timestamp);
+                  &valueType, &paramValue, timestamp);
 }
 
 int ApMon::sendParameter(char *clusterName, char *nodeName,
-		char *paramName, int paramValue) throw(runtime_error) {
+        char *paramName, int paramValue) throw(std::runtime_error) {
   
   return sendParameter(clusterName, nodeName, paramName, XDR_INT32, 
-		    (char *)&paramValue);
+            (char *)&paramValue);
 }
 
 int ApMon::sendParameter(char *clusterName, char *nodeName,
-		char *paramName, float paramValue) throw(runtime_error) {
+        char *paramName, float paramValue) throw(std::runtime_error) {
   
   return sendParameter(clusterName, nodeName, paramName, XDR_REAL32, 
-		    (char *)&paramValue);
+            (char *)&paramValue);
 }
 
 int ApMon::sendParameter(char *clusterName, char *nodeName,
-		char *paramName, double paramValue) throw(runtime_error) {
+        char *paramName, double paramValue) throw(std::runtime_error) {
   
   return sendParameter(clusterName, nodeName, paramName, XDR_REAL64, 
-		    (char *)&paramValue);
+            (char *)&paramValue);
 }
 
 int ApMon::sendParameter(char *clusterName, char *nodeName,
-		char *paramName, char *paramValue) throw(runtime_error) {
+        char *paramName, char *paramValue) throw(std::runtime_error) {
   
   return sendParameter(clusterName, nodeName, paramName, XDR_STRING, 
-		    paramValue);
+            paramValue);
 }
 
 void ApMon::encodeParams(int nParams, char **paramNames, int *valueTypes, 
-			char **paramValues, int timestamp) 
-  throw(runtime_error){
+            char **paramValues, int timestamp) 
+  throw(std::runtime_error){
   XDR xdrs; /* XDR handle. */
   int i, effectiveNParams;
 
@@ -815,8 +816,8 @@ void ApMon::encodeParams(int nParams, char **paramNames, int *valueTypes,
   effectiveNParams = nParams;
   for (i = 0; i < nParams; i++) {
       if (paramNames[i] == NULL || (valueTypes[i] == XDR_STRING && 
-				    paramValues[i] == NULL)) {
-	effectiveNParams--;
+                    paramValues[i] == NULL)) {
+    effectiveNParams--;
       }
   }
   if (effectiveNParams == 0)
@@ -843,7 +844,7 @@ void ApMon::encodeParams(int nParams, char **paramNames, int *valueTypes,
   try {
     /* encode the cluster name, the node name and the number of parameters */
     if (!xdr_string(&xdrs, &(clusterName), strlen(clusterName) 
-		    + 1))
+            + 1))
       throw runtime_error("[ encodeParams() ] XDR encoding error for the cluster name");
 
     if (!xdr_string(&xdrs, &(nodeName), strlen(nodeName) + 1))
@@ -855,55 +856,55 @@ void ApMon::encodeParams(int nParams, char **paramNames, int *valueTypes,
     /* encode the parameters */
     for (i = 0; i < nParams; i++) {
       if (paramNames[i] == NULL || (valueTypes[i] == XDR_STRING && 
-				    paramValues[i] == NULL)) {
-	logger(WARNING, "NULL parameter name or value - skipping parameter...");
-	continue;
+                    paramValues[i] == NULL)) {
+    logger(WARNING, "NULL parameter name or value - skipping parameter...");
+    continue;
       }
 
       /* parameter name */
       if (!xdr_string(&xdrs, &(paramNames[i]), strlen(paramNames[i]) + 1))
-	throw runtime_error("[ encodeParams() ] XDR encoding error for parameter name");
+    throw runtime_error("[ encodeParams() ] XDR encoding error for parameter name");
     
       /* parameter value type */
       if (!xdr_int(&xdrs, &(valueTypes[i])))  
-	throw runtime_error("[ encodeParams() ] XDR encoding error for parameter value type");
+    throw runtime_error("[ encodeParams() ] XDR encoding error for parameter value type");
 
       /* parameter value */
       switch (valueTypes[i]) {
       case XDR_STRING:
-	if (!xdr_string(&xdrs, &(paramValues[i]), 
-			strlen(paramValues[i]) + 1))
-	  throw runtime_error("[ encodeParams() ] XDR encoding error for parameter value");
-	break;
-	//INT16 is not supported
-	/*    case XDR_INT16:  
-	      if (!xdr_short(&xdrs, (short *)(paramValues[i])))
-	      return RET_ERROR;
-	      break;
-	*/    case XDR_INT32:
-		if (!xdr_int(&xdrs, (int *)(paramValues[i])))  
-		  throw runtime_error("[ encodeParams() ] XDR encoding error for parameter value");
-		break;
+    if (!xdr_string(&xdrs, &(paramValues[i]), 
+            strlen(paramValues[i]) + 1))
+      throw runtime_error("[ encodeParams() ] XDR encoding error for parameter value");
+    break;
+    //INT16 is not supported
+    /*    case XDR_INT16:  
+          if (!xdr_short(&xdrs, (short *)(paramValues[i])))
+          return RET_ERROR;
+          break;
+    */    case XDR_INT32:
+        if (!xdr_int(&xdrs, (int *)(paramValues[i])))  
+          throw runtime_error("[ encodeParams() ] XDR encoding error for parameter value");
+        break;
       case XDR_REAL32:
-	if (!xdr_float(&xdrs, (float *)(paramValues[i])))
-	  throw runtime_error("[ encodeParams() ] XDR encoding error for parameter value");
-	break;
+    if (!xdr_float(&xdrs, (float *)(paramValues[i])))
+      throw runtime_error("[ encodeParams() ] XDR encoding error for parameter value");
+    break;
       case XDR_REAL64:
-	if (!xdr_double(&xdrs, (double *)(paramValues[i])))
-	  throw runtime_error("[ encodeParams() ] XDR encoding error for parameter value");
-	break;
+    if (!xdr_double(&xdrs, (double *)(paramValues[i])))
+      throw runtime_error("[ encodeParams() ] XDR encoding error for parameter value");
+    break;
       default:
-	throw runtime_error("[ encodeParams() ] Unknown type for XDR encoding");
+    throw runtime_error("[ encodeParams() ] Unknown type for XDR encoding");
       }
     }
    
     /* encode the timestamp if necessary */
     if (timestamp > 0) {
       if (!xdr_int(&xdrs, &timestamp))  
-	throw runtime_error("[ encodeParams() ] XDR encoding error for the timestamp");
+    throw runtime_error("[ encodeParams() ] XDR encoding error for the timestamp");
       dgramSize += xdrSize(XDR_INT32, NULL);
     }
-  } catch (runtime_error& err) {
+  } catch (std::runtime_error& err) {
     xdr_destroy(&xdrs);
     throw err;
   }
@@ -971,28 +972,28 @@ DWORD WINAPI bkTask(void *param) {
     
     /* determine the next operation that must be performed */
     if (nextRecheck > 0 && (nextJobInfoSend <= 0 || 
-			    nextRecheck <= nextJobInfoSend)) {
+                nextRecheck <= nextJobInfoSend)) {
       if (nextSysInfoSend <= 0 || nextRecheck <= nextSysInfoSend) {
-	nextOp = RECHECK_CONF;
-	timeRemained = (nextRecheck - crtTime > 0) ? (nextRecheck - crtTime) : 0;
+    nextOp = RECHECK_CONF;
+    timeRemained = (nextRecheck - crtTime > 0) ? (nextRecheck - crtTime) : 0;
       } else {
-	nextOp = SYS_INFO_SEND;
-	timeRemained = (nextSysInfoSend - crtTime > 0) ? (nextSysInfoSend - crtTime) : 0;
+    nextOp = SYS_INFO_SEND;
+    timeRemained = (nextSysInfoSend - crtTime > 0) ? (nextSysInfoSend - crtTime) : 0;
       }
     } else {
       if (nextJobInfoSend > 0 && (nextSysInfoSend <= 0 || 
-				  nextJobInfoSend <= nextSysInfoSend)) {
-	nextOp = JOB_INFO_SEND;
-	timeRemained = (nextJobInfoSend - crtTime > 0) ? (nextJobInfoSend - crtTime) : 0;
+                  nextJobInfoSend <= nextSysInfoSend)) {
+    nextOp = JOB_INFO_SEND;
+    timeRemained = (nextJobInfoSend - crtTime > 0) ? (nextJobInfoSend - crtTime) : 0;
       } else if (nextSysInfoSend > 0) {
-	nextOp = SYS_INFO_SEND;
-	timeRemained = (nextSysInfoSend - crtTime > 0) ? (nextSysInfoSend - crtTime) : 0;
+    nextOp = SYS_INFO_SEND;
+    timeRemained = (nextSysInfoSend - crtTime > 0) ? (nextSysInfoSend - crtTime) : 0;
       }
     }
 
     if (timeRemained == -1) {
-	logger(INFO, "Background thread has no operation to perform...");
-	timeRemained = RECHECK_INTERVAL;
+    logger(INFO, "Background thread has no operation to perform...");
+    timeRemained = RECHECK_INTERVAL;
     }
 
 #ifndef WIN32
@@ -1012,24 +1013,24 @@ DWORD WINAPI bkTask(void *param) {
       haveChange = true;
     if (apm -> jobMonChanged) {
       if (apm -> jobMonitoring) 
-	nextJobInfoSend = crtTime + apm -> jobMonitorInterval;
+    nextJobInfoSend = crtTime + apm -> jobMonitorInterval;
       else
-	nextJobInfoSend = -1;
+    nextJobInfoSend = -1;
       apm -> jobMonChanged = false;
     }
     if (apm -> sysMonChanged) {
       if (apm -> sysMonitoring) 
-	nextSysInfoSend = crtTime + apm -> sysMonitorInterval;
+    nextSysInfoSend = crtTime + apm -> sysMonitorInterval;
       else
-	nextSysInfoSend = -1;
+    nextSysInfoSend = -1;
       apm -> sysMonChanged = false;
     }
     if (apm -> recheckChanged) {
       if (apm -> confCheck) {
-	nextRecheck = crtTime + apm -> crtRecheckInterval;
+    nextRecheck = crtTime + apm -> crtRecheckInterval;
       }
       else
-	nextRecheck = -1;
+    nextRecheck = -1;
       apm -> recheckChanged = false;
     }
     pthread_mutex_unlock(&(apm -> mutexBack));
@@ -1043,7 +1044,7 @@ DWORD WINAPI bkTask(void *param) {
        a change in the settings occurs */
 #ifndef WIN32
     ret = pthread_cond_timedwait(&(apm -> confChangedCond), 
-				&(apm -> mutexCond), &delay);
+                &(apm -> mutexCond), &delay);
     pthread_mutex_unlock(&(apm -> mutexCond));
 #else
     pthread_mutex_unlock(&(apm -> mutexCond));
@@ -1052,66 +1053,66 @@ DWORD WINAPI bkTask(void *param) {
     if (ret == ETIMEDOUT) {
       /* now perform the operation */
       if (nextOp == JOB_INFO_SEND) {
-	apm -> sendJobInfo();
-	crtTime = time(NULL);
-	nextJobInfoSend = crtTime + apm -> getJobMonitorInterval();
+    apm -> sendJobInfo();
+    crtTime = time(NULL);
+    nextJobInfoSend = crtTime + apm -> getJobMonitorInterval();
       }
       
       if (nextOp == SYS_INFO_SEND) {
-	apm -> sendSysInfo();
-	if (apm -> getGenMonitoring()) {
-	  if (generalInfoCount <= 1)
-	    apm -> sendGeneralInfo();
-	  generalInfoCount = (generalInfoCount + 1) % apm -> genMonitorIntervals;
-	}
-	crtTime = time(NULL);
-	nextSysInfoSend = crtTime + apm -> getSysMonitorInterval();
+    apm -> sendSysInfo();
+    if (apm -> getGenMonitoring()) {
+      if (generalInfoCount <= 1)
+        apm -> sendGeneralInfo();
+      generalInfoCount = (generalInfoCount + 1) % apm -> genMonitorIntervals;
+    }
+    crtTime = time(NULL);
+    nextSysInfoSend = crtTime + apm -> getSysMonitorInterval();
       }
 
       if (nextOp == RECHECK_CONF) {
-	resourceChanged = false;
-	try {
-	  if (apm -> initType == FILE_INIT) {
-	    snprintf(logmsg, 199, "Checking for modifications for file %s ", 
-		    apm -> initSources[0]);
-	    logger(INFO, logmsg);
-	    stat(apm -> initSources[0], &st);
-	    if (st.st_mtime > apm -> lastModifFile) {
-	      snprintf(logmsg, 199, "File %s modified ", apm -> initSources[0]);
-	      logger(INFO, logmsg);
-	      resourceChanged = true;
-	    }
-	  }
+    resourceChanged = false;
+    try {
+      if (apm -> initType == FILE_INIT) {
+        snprintf(logmsg, 199, "Checking for modifications for file %s ", 
+            apm -> initSources[0]);
+        logger(INFO, logmsg);
+        stat(apm -> initSources[0], &st);
+        if (st.st_mtime > apm -> lastModifFile) {
+          snprintf(logmsg, 199, "File %s modified ", apm -> initSources[0]);
+          logger(INFO, logmsg);
+          resourceChanged = true;
+        }
+      }
 
-	  // check the configuration URLs
-	  for (i = 0; i < apm -> confURLs.nConfURLs; i++) {
-	    snprintf(logmsg, 199, "[Checking for modifications for URL %s ] ", 
-		   apm -> confURLs.vURLs[i]);
-	    logger(INFO, logmsg);
-	    if (urlModified(apm -> confURLs.vURLs[i], apm -> confURLs.lastModifURLs[i])) {
-	      snprintf(logmsg, 199, "URL %s modified ", apm -> confURLs.vURLs[i]);
-	      logger(INFO, logmsg);
-	      resourceChanged = true;
-	      break;
-	    }
-	  }
+      // check the configuration URLs
+      for (i = 0; i < apm -> confURLs.nConfURLs; i++) {
+        snprintf(logmsg, 199, "[Checking for modifications for URL %s ] ", 
+           apm -> confURLs.vURLs[i]);
+        logger(INFO, logmsg);
+        if (urlModified(apm -> confURLs.vURLs[i], apm -> confURLs.lastModifURLs[i])) {
+          snprintf(logmsg, 199, "URL %s modified ", apm -> confURLs.vURLs[i]);
+          logger(INFO, logmsg);
+          resourceChanged = true;
+          break;
+        }
+      }
 
-	  if (resourceChanged) {
-	    logger(INFO, "Reloading configuration...");
-	    if (apm -> initType == FILE_INIT)
-	      apm -> initialize(apm -> initSources[0], false);
-	    else
-	      apm -> initialize(apm -> nInitSources, apm -> initSources, false);
-	  }
-	  apm -> setCrtRecheckInterval(apm -> getRecheckInterval());
-	} catch (runtime_error &err) {
-	  logger(WARNING, err.what());
-	  logger(WARNING, "Increasing the time interval for reloading the configuration...");
-	  apm -> setCrtRecheckInterval(apm -> getRecheckInterval() * 5);
-	}
-	crtTime = time(NULL);
-	nextRecheck = crtTime + apm -> getCrtRecheckInterval();
-	//sleep(apm -> getCrtRecheckInterval());
+      if (resourceChanged) {
+        logger(INFO, "Reloading configuration...");
+        if (apm -> initType == FILE_INIT)
+          apm -> initialize(apm -> initSources[0], false);
+        else
+          apm -> initialize(apm -> nInitSources, apm -> initSources, false);
+      }
+      apm -> setCrtRecheckInterval(apm -> getRecheckInterval());
+    } catch (std::runtime_error &err) {
+      logger(WARNING, err.what());
+      logger(WARNING, "Increasing the time interval for reloading the configuration...");
+      apm -> setCrtRecheckInterval(apm -> getRecheckInterval() * 5);
+    }
+    crtTime = time(NULL);
+    nextRecheck = crtTime + apm -> getCrtRecheckInterval();
+    //sleep(apm -> getCrtRecheckInterval());
       }
     }
  
@@ -1289,7 +1290,7 @@ void ApMon::setBackgroundThread(bool val) {
 }
 
 void ApMon::addJobToMonitor(long pid, char *workdir, char *clusterName,
-			    char *nodeName) throw(runtime_error) {
+                char *nodeName) throw(std::runtime_error) {
   if (nMonJobs >= MAX_MONITORED_JOBS)
     throw runtime_error("[ addJobToMonitor() ] Maximum number of jobs that can be monitored exceeded.");
   MonitoredJob job;
@@ -1312,7 +1313,7 @@ void ApMon::addJobToMonitor(long pid, char *workdir, char *clusterName,
   monJobs[nMonJobs++] = job;
 }
 
-void ApMon::removeJobToMonitor(long pid) throw(runtime_error) {
+void ApMon::removeJobToMonitor(long pid) throw(std::runtime_error) {
   int i, j;
   char msg[100];
 
@@ -1323,7 +1324,7 @@ void ApMon::removeJobToMonitor(long pid) throw(runtime_error) {
     if (monJobs[i].pid == pid) {
       /* found the job, now remove it */
       for (j = i; j < nMonJobs - 1; j++)
-	monJobs[j] = monJobs[j + 1];
+    monJobs[j] = monJobs[j + 1];
       nMonJobs--;
       return;
     }
@@ -1357,13 +1358,13 @@ void ApMon::setLogLevel(char *newLevel_s) {
     logger(0, NULL, newLevel);
 }
 
-	
+    
 void ApMon::setMaxMsgRate(int maxRate) {
   if (maxRate > 0)
     this -> maxMsgRate  = maxRate;
 }
 
-void ApMon::initSocket() throw(runtime_error) {
+void ApMon::initSocket() throw(std::runtime_error) {
   int optval1 = 1;
   struct timeval optval2; 
   int ret1 = 0, ret2 = 0, ret3 = 0;
@@ -1407,8 +1408,8 @@ void ApMon::initSocket() throw(runtime_error) {
 
 
 void ApMon::parseConf(FILE *fp, int *nDestinations, char **destAddresses, 
-		     int *destPorts, char **destPasswds)
-  throw(runtime_error) {
+             int *destPorts, char **destPasswds)
+  throw(std::runtime_error) {
   int i, ch;
   char *line = (char *)malloc ((MAX_STRING_LEN1) * sizeof(char));
   char *tmp = NULL; 
@@ -1430,7 +1431,7 @@ void ApMon::parseConf(FILE *fp, int *nDestinations, char **destAddresses,
     ungetc(ch, fp);
     if (line[strlen(line) - 1] != 10 && ch != EOF) {
       /* if the line doesn't end with a \n and we are not at the end
-	 of file, the line from the file was longer than MAX_STRING_LEN */
+     of file, the line from the file was longer than MAX_STRING_LEN */
       fclose(fp);
       throw runtime_error ("[ parseConf() ] Maximum line length exceeded in the conf file");
     }
@@ -1457,15 +1458,15 @@ void ApMon::parseConf(FILE *fp, int *nDestinations, char **destAddresses,
     if (*nDestinations >= MAX_N_DESTINATIONS) {
       free(line); free(tmp); 
       for (i = 0; i < *nDestinations; i++) {
-	free(destAddresses[i]);
-	free(destPasswds[i]);
+    free(destAddresses[i]);
+    free(destPasswds[i]);
       }
       fclose(fp);
       throw runtime_error("[ parseConf() ] Maximum number of destinations exceeded.");
     }
 
     addToDestinations(tmp, nDestinations, destAddresses, destPorts, 
-		      destPasswds);
+              destPasswds);
   }
 
   if (tmp != NULL)
@@ -1493,7 +1494,7 @@ bool ApMon::shouldSend() {
     crtDrop = 0;
     //printf("\n");
   }
-		
+        
   /** compute the history */
   int valSent = (int)(prvSent * hWeight + crtSent * (1.0 - hWeight));
 

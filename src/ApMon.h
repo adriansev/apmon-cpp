@@ -106,7 +106,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <net/if.h>
-#include <rpc/rpc.h>
+#include <tirpc/rpc/rpc.h>
 #include <netdb.h>
 #include <unistd.h>
 #include <pthread.h>
@@ -131,8 +131,6 @@
 
 #endif  // ~WIN32
 
-using namespace std;
-
 #define XDR_STRING  0  /**< Used to code the string data type */
 //#define XDR_INT16   1  /**< Used to code the 2 bytes integer data type */ // NOT SUPPORTED YET!
 #define XDR_INT32   2  /**< Used to code the 4 bytes integer data type */
@@ -147,10 +145,10 @@ using namespace std;
 #define RET_ERROR   -1  /**< Function return value (error). */
 #define PROCUTILS_ERROR -2
 #define RET_NOT_SENT -3 /**< A datagram was not sent because the number of
-			   datagrams that can be sent per second is limited. */
+               datagrams that can be sent per second is limited. */
 
 #define MAX_N_DESTINATIONS 30  /**< Maximum number of destinations hosts to 
-				  which we send the parameters. */
+                  which we send the parameters. */
 
 #define DEFAULT_PORT 8884 /**< The default port on which MonALISa listens. */
 #define MAX_HEADER_LENGTH 40  /**< Maximum header length. */
@@ -490,10 +488,10 @@ class ApMon {
 
  private:
   /** Copy constructor */
-  ApMon(const ApMon&);	// Not implemented
+  ApMon(const ApMon&);    // Not implemented
   
   /** The equals operator */
-  ApMon& operator=(const ApMon&);	// Not implemented
+  ApMon& operator=(const ApMon&);    // Not implemented
 
  public:
   /**
@@ -502,7 +500,7 @@ class ApMon {
    * the ports of the destination hosts, and also the passwords (see README 
    * for details about the structure of this file).
    */
-  ApMon(char *initsource) throw(runtime_error);
+  ApMon(char *initsource) throw(std::runtime_error);
   
 
   /**
@@ -510,7 +508,7 @@ class ApMon {
    * can be of the form hostname[:port] [passwd] or can be URLs from where the 
    * hostnames are to be read.
    */
-  ApMon(int nDestinations, char **destinationsList) throw(runtime_error);
+  ApMon(int nDestinations, char **destinationsList) throw(std::runtime_error);
 
   /**
    * Initializes an ApMon data structure, using arrays instead of a file.
@@ -523,7 +521,7 @@ class ApMon {
    * @param destPasswds The passwords for the MonALISA hosts.
    *
    */
-  ApMon(int nDestinations, char **destAddresses, int *destPorts, char **destPasswds) throw(runtime_error);
+  ApMon(int nDestinations, char **destAddresses, int *destPorts, char **destPasswds) throw(std::runtime_error);
 
   /**
    * ApMon destructor.
@@ -546,8 +544,8 @@ class ApMon {
    * On error an exception is thrown.
    */
   int sendParameter(char *clusterName, char *nodeName,
-	       char *paramName, int valueType, char *paramValue)
-    throw(runtime_error);
+           char *paramName, int valueType, char *paramValue)
+    throw(std::runtime_error);
 
   /**
    * Sends a parameter and its value to the MonALISA module, together with a 
@@ -567,8 +565,8 @@ class ApMon {
    * On error an exception is thrown.
    */
   int sendTimedParameter(char *clusterName, char *nodeName,
-	      char *paramName, int valueType, char *paramValue, int timestamp)
-    throw(runtime_error);
+          char *paramName, int valueType, char *paramValue, int timestamp)
+    throw(std::runtime_error);
 
   /**
    * Sends an integer parameter and its value to the MonALISA module. 
@@ -583,8 +581,8 @@ class ApMon {
    * On error an exception is thrown.
    */
   int sendParameter(char *clusterName, char *nodeName,
-	       char *paramName, int paramValue)
-    throw(runtime_error);
+           char *paramName, int paramValue)
+    throw(std::runtime_error);
 
   /**
    * Sends a parameter of type float and its value to the MonALISA module. 
@@ -599,8 +597,8 @@ class ApMon {
    * On error an exception is thrown.
    */
   int sendParameter(char *clusterName, char *nodeName,
-	       char *paramName, float paramValue)
-    throw(runtime_error);
+           char *paramName, float paramValue)
+    throw(std::runtime_error);
 
   /**
    * Sends a parameter of type double and its value to the MonALISA module. 
@@ -615,8 +613,8 @@ class ApMon {
    * On error an exception is thrown.
    */
   int sendParameter(char *clusterName, char *nodeName,
-	       char *paramName, double paramValue)
-    throw(runtime_error);
+           char *paramName, double paramValue)
+    throw(std::runtime_error);
 
   /**
    * Sends a parameter of type string and its value to the MonALISA module. 
@@ -631,8 +629,8 @@ class ApMon {
    * On error an exception is thrown.
    */
   int sendParameter(char *clusterName, char *nodeName,
-	       char *paramName, char *paramValue)
-    throw(runtime_error);
+           char *paramName, char *paramValue)
+    throw(std::runtime_error);
 
 
   /**
@@ -648,8 +646,8 @@ class ApMon {
    * On error an exception is thrown.
    */
   int sendParameters(char *clusterName, char *nodeName,
-	       int nParams, char **paramNames, int *valueTypes, 
-			 char **paramValues) throw(runtime_error);
+           int nParams, char **paramNames, int *valueTypes, 
+             char **paramValues) throw(std::runtime_error);
 
   /**
    * Sends a set of parameters and their values to the MonALISA module, 
@@ -668,8 +666,8 @@ class ApMon {
    * On error an exception is thrown.
    */
   int sendTimedParameters(char *clusterName, char *nodeName,
-	       int nParams, char **paramNames, int *valueTypes, 
-	       char **paramValues, int timestamp) throw(runtime_error);
+           int nParams, char **paramNames, int *valueTypes, 
+           char **paramValues, int timestamp) throw(std::runtime_error);
 
   /**
    * Returns the value of the confCheck flag. If it is true, the 
@@ -823,13 +821,13 @@ class ApMon {
    * for this job in MonALISA.
    */
   void addJobToMonitor(long pid, char *workdir, char *clusterName,
-		       char *nodeName) throw(runtime_error);
+               char *nodeName) throw(std::runtime_error);
 
   /**
    * Removes a job from the list of the jobs monitored by ApMon.
    * @param pid The pid of the job to be removed. 
    */
-  void removeJobToMonitor(long pid) throw(runtime_error);
+  void removeJobToMonitor(long pid) throw(std::runtime_error);
 
   /** This function is called by the user to set the cluster name and the node 
     name for the system monitoring datagrams.*/
@@ -864,11 +862,11 @@ class ApMon {
    * object is being constructed now). Else, only some structures will be 
    * reinitialized.
    */
-  void initialize(char *filename, bool firstTime) throw(runtime_error);
+  void initialize(char *filename, bool firstTime) throw(std::runtime_error);
 
   /** Initializes an ApMon object from a list with URLs and destination hosts. */
   void constructFromList(int nDestinations, char **destinationsList)
-    throw(runtime_error);
+    throw(std::runtime_error);
 
   /**
    * Initializes an ApMon object from a list with URLs and destination hosts.
@@ -878,7 +876,7 @@ class ApMon {
    * (the object is being constructed now). Else, only some structures will 
    * be reinitialized.
    */
-  void initialize(int nDestinations, char **destList, bool firstTime) throw(runtime_error);
+  void initialize(int nDestinations, char **destList, bool firstTime) throw(std::runtime_error);
 
 
   /**
@@ -893,7 +891,7 @@ class ApMon {
    * @param destPasswds Will contain the passwords for the destination hosts.
    */
   void loadFile(char *filename, int *nDestinations, char **destAddresses,
-		int *destPorts, char **destPasswds) throw(runtime_error);
+        int *destPorts, char **destPasswds) throw(std::runtime_error);
 
  
    /**
@@ -908,8 +906,8 @@ class ApMon {
    *
    */
   void arrayInit(int nDestinations, char **destAddresses, int *destPorts,
-		 char **destPasswds)
-    throw(runtime_error);
+         char **destPasswds)
+    throw(std::runtime_error);
 
   /**
    * Internal function that initializes an ApMon data structure.
@@ -925,8 +923,8 @@ class ApMon {
    * reinitialized.
    */
   void arrayInit(int nDestinations, char **destAddresses, int *destPorts,
-		      char **destPasswds, bool firstTime)
-    throw(runtime_error);
+              char **destPasswds, bool firstTime)
+    throw(std::runtime_error);
 
   /**
    * Parses the string line, which has the form hostname:port, and
@@ -939,15 +937,15 @@ class ApMon {
    * @param destPasswds Passwords for the destination hosts.
    */ 
   void addToDestinations(char *line, int *nDestinations, 
-		char *destAddresses[], int destPorts[], char *destPasswds[]); 
+        char *destAddresses[], int destPorts[], char *destPasswds[]); 
 
   /**
    * Gets a configuration file from a web location and adds the destination
    * addresses and ports to the lists given as parameters.
    */
   void getDestFromWeb(char *url, int *nDestinations, char *destAddresses[], 
-		 int destPorts[], char *destPasswds[],
-		      ConfURLs& confURLs) throw(runtime_error);
+         int destPorts[], char *destPasswds[],
+              ConfURLs& confURLs) throw(std::runtime_error);
 
  
   /**
@@ -955,7 +953,7 @@ class ApMon {
    * called before sending the data over the newtork.
    */ 
   void encodeParams(int nParams, char **paramNames, int *valueTypes, 
-		 char **paramValues, int timestamp) throw(runtime_error);
+         char **paramValues, int timestamp) throw(std::runtime_error);
 
   /** Initializes the monitoring configurations and the names of the parameters
    * included in the monitoring datagrams.
@@ -1031,14 +1029,14 @@ class ApMon {
   void parseXApMonLine(char *line);
 
   /** Initializes the UDP socket used to send the datagrams. */
-  void initSocket() throw(runtime_error);
+  void initSocket() throw(std::runtime_error);
 
   /** Parses the contents of a configuration file. The destination addresses
       and ports are stored in the arrays given as parameters.
   */
   void parseConf(FILE *fp, int *nDestinations, char **destAddresses, 
-		     int *destPorts, char **destPasswds)
-    throw(runtime_error);
+             int *destPorts, char **destPasswds)
+    throw(std::runtime_error);
 
   /**
    * Decides if the current datagram should be sent (so that the maximum
@@ -1056,7 +1054,7 @@ class ApMon {
   * thread).
   */
 #ifndef WIN32
-void *bkTask(void *param); // throw(runtime_error);
+void *bkTask(void *param); // throw(std::runtime_error);
 #else
 DWORD WINAPI bkTask(void *param);
 #endif

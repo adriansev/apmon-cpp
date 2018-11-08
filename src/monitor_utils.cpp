@@ -41,6 +41,7 @@
 #include "utils.h"
 #include "mon_constants.h"
 
+using namespace std;
 using namespace apmon_utils;
 using namespace apmon_mon_utils;
 
@@ -95,18 +96,18 @@ void ApMon::updateJobInfo(MonitoredJob job) {
       currentJobVals[JOB_RSS] = jobInfo.rsz;
 
       if (jobInfo.open_fd < 0)
-	jobRetResults[JOB_OPEN_FILES] = RET_ERROR;
+    jobRetResults[JOB_OPEN_FILES] = RET_ERROR;
       currentJobVals[JOB_OPEN_FILES] = jobInfo.open_fd;
 
-    } catch (runtime_error &err) {
+    } catch (std::runtime_error &err) {
       logger(WARNING, err.what());
       jobRetResults[JOB_RUN_TIME] = jobRetResults[JOB_CPU_TIME] = 
-	jobRetResults[JOB_CPU_USAGE] = jobRetResults[JOB_MEM_USAGE] =
-	jobRetResults[JOB_VIRTUALMEM] = jobRetResults[JOB_RSS] =
-	jobRetResults[JOB_OPEN_FILES] = RET_ERROR;
+    jobRetResults[JOB_CPU_USAGE] = jobRetResults[JOB_MEM_USAGE] =
+    jobRetResults[JOB_VIRTUALMEM] = jobRetResults[JOB_RSS] =
+    jobRetResults[JOB_OPEN_FILES] = RET_ERROR;
       strncpy(err_msg, err.what(), 199);
       if (strstr(err_msg, "does not exist") != NULL)
-	jobExists = false;
+    jobExists = false;
     } 
   }
 
@@ -114,7 +115,7 @@ void ApMon::updateJobInfo(MonitoredJob job) {
   if (!jobExists) {
     try {
       removeJobToMonitor(job.pid);
-    } catch (runtime_error &err) {
+    } catch (std::runtime_error &err) {
       logger(WARNING, err.what());
     }
     return;
@@ -132,11 +133,11 @@ void ApMon::updateJobInfo(MonitoredJob job) {
       currentJobVals[JOB_DISK_USED] = dirInfo.disk_used;
       currentJobVals[JOB_DISK_USAGE] = dirInfo.disk_usage; 
       currentJobVals[JOB_DISK_FREE] = dirInfo.disk_free;
-    } catch (runtime_error& err) {
+    } catch (std::runtime_error& err) {
       logger(WARNING, err.what());
       jobRetResults[JOB_WORKDIR_SIZE] = jobRetResults[JOB_DISK_TOTAL] = 
-	jobRetResults[JOB_DISK_USED] = jobRetResults[JOB_DISK_USAGE] =
-	jobRetResults[JOB_DISK_FREE] = RET_ERROR;
+    jobRetResults[JOB_DISK_USED] = jobRetResults[JOB_DISK_USAGE] =
+    jobRetResults[JOB_DISK_FREE] = RET_ERROR;
     }
   }
 }
@@ -168,11 +169,11 @@ void ApMon::sendOneJobInfo(MonitoredJob job) {
       nParams++;
     } 
     /* don't disable the parameter (maybe for another job it can be
-	 obtained) */
+     obtained) */
       /*
-	else
-	if (autoDisableMonitoring)
-	actJobMonitorParams[ind] = 0;
+    else
+    if (autoDisableMonitoring)
+    actJobMonitorParams[ind] = 0;
       */
   }
 
@@ -185,8 +186,8 @@ void ApMon::sendOneJobInfo(MonitoredJob job) {
   try {
     if (nParams > 0)
       sendParameters(job.clusterName, job.nodeName, nParams, 
-		     paramNames, valueTypes, paramValues);
-  } catch (runtime_error& err) {
+             paramNames, valueTypes, paramValues);
+  } catch (std::runtime_error& err) {
     logger(WARNING, err.what());
   }
 
@@ -211,36 +212,36 @@ void ApMon::updateSysInfo() {
   if (needCPUInfo) {
     try {
       ProcUtils::getCPUUsage(*this, currentSysVals[SYS_CPU_USAGE], 
-			     currentSysVals[SYS_CPU_USR], 
-			     currentSysVals[SYS_CPU_SYS],
-			     currentSysVals[SYS_CPU_NICE], 
-			     currentSysVals[SYS_CPU_IDLE],
-			     currentSysVals[SYS_CPU_IOWAIT],
-			     currentSysVals[SYS_CPU_IRQ],
-			     currentSysVals[SYS_CPU_SOFTIRQ],
-			     currentSysVals[SYS_CPU_STEAL],
-			     currentSysVals[SYS_CPU_GUEST],
-			     numCPUs);
+                 currentSysVals[SYS_CPU_USR], 
+                 currentSysVals[SYS_CPU_SYS],
+                 currentSysVals[SYS_CPU_NICE], 
+                 currentSysVals[SYS_CPU_IDLE],
+                 currentSysVals[SYS_CPU_IOWAIT],
+                 currentSysVals[SYS_CPU_IRQ],
+                 currentSysVals[SYS_CPU_SOFTIRQ],
+                 currentSysVals[SYS_CPU_STEAL],
+                 currentSysVals[SYS_CPU_GUEST],
+                 numCPUs);
     } catch (procutils_error &perr) {
       /* "permanent" error (the parameters could not be obtained) */
       logger(WARNING, perr.what());
       sysRetResults[SYS_CPU_USAGE] = sysRetResults[SYS_CPU_SYS] = 
-	  sysRetResults[SYS_CPU_USR] = sysRetResults[SYS_CPU_NICE] =
-	  sysRetResults[SYS_CPU_IDLE] = sysRetResults[SYS_CPU_USAGE] =
-	  sysRetResults[SYS_CPU_IOWAIT] = sysRetResults[SYS_CPU_IRQ] =
-	  sysRetResults[SYS_CPU_SOFTIRQ] = sysRetResults[SYS_CPU_STEAL] =
-	  sysRetResults[SYS_CPU_GUEST] = 
-	  PROCUTILS_ERROR;
-    } catch (runtime_error &err) {
+      sysRetResults[SYS_CPU_USR] = sysRetResults[SYS_CPU_NICE] =
+      sysRetResults[SYS_CPU_IDLE] = sysRetResults[SYS_CPU_USAGE] =
+      sysRetResults[SYS_CPU_IOWAIT] = sysRetResults[SYS_CPU_IRQ] =
+      sysRetResults[SYS_CPU_SOFTIRQ] = sysRetResults[SYS_CPU_STEAL] =
+      sysRetResults[SYS_CPU_GUEST] = 
+      PROCUTILS_ERROR;
+    } catch (std::runtime_error &err) {
       /* temporary error (next time we might be able to get the paramerers) */
       logger(WARNING, err.what());
       sysRetResults[SYS_CPU_USAGE] = sysRetResults[SYS_CPU_SYS] = 
-	  sysRetResults[SYS_CPU_USR] = sysRetResults[SYS_CPU_NICE] =
-	  sysRetResults[SYS_CPU_IDLE] = sysRetResults[SYS_CPU_USAGE] =
-	  sysRetResults[SYS_CPU_IOWAIT] = sysRetResults[SYS_CPU_IRQ] =
-	  sysRetResults[SYS_CPU_SOFTIRQ] = sysRetResults[SYS_CPU_STEAL] =
-	  sysRetResults[SYS_CPU_GUEST] =
-	  RET_ERROR;
+      sysRetResults[SYS_CPU_USR] = sysRetResults[SYS_CPU_NICE] =
+      sysRetResults[SYS_CPU_IDLE] = sysRetResults[SYS_CPU_USAGE] =
+      sysRetResults[SYS_CPU_IOWAIT] = sysRetResults[SYS_CPU_IRQ] =
+      sysRetResults[SYS_CPU_SOFTIRQ] = sysRetResults[SYS_CPU_STEAL] =
+      sysRetResults[SYS_CPU_GUEST] =
+      RET_ERROR;
     }
   }
 
@@ -251,19 +252,19 @@ void ApMon::updateSysInfo() {
   if (needSwapPagesInfo) {
     try {
       ProcUtils::getSwapPages(*this, currentSysVals[SYS_PAGES_IN], 
-			      currentSysVals[SYS_PAGES_OUT], 
-			      currentSysVals[SYS_SWAP_IN],
-			      currentSysVals[SYS_SWAP_OUT]);
+                  currentSysVals[SYS_PAGES_OUT], 
+                  currentSysVals[SYS_SWAP_IN],
+                  currentSysVals[SYS_SWAP_OUT]);
     } catch (procutils_error &perr) {
       /* "permanent" error (the parameters could not be obtained) */
       logger(WARNING, perr.what());
       sysRetResults[SYS_PAGES_IN] = sysRetResults[SYS_PAGES_OUT] = 
       sysRetResults[SYS_SWAP_OUT] = sysRetResults[SYS_SWAP_IN] = PROCUTILS_ERROR;
-    } catch (runtime_error &err) {
+    } catch (std::runtime_error &err) {
       /* temporary error (next time we might be able to get the paramerers) */
       logger(WARNING, err.what());
       sysRetResults[SYS_PAGES_IN] = sysRetResults[SYS_PAGES_OUT] = 
-	sysRetResults[SYS_SWAP_IN] = sysRetResults[SYS_SWAP_OUT] = RET_ERROR;
+    sysRetResults[SYS_SWAP_IN] = sysRetResults[SYS_SWAP_OUT] = RET_ERROR;
     }
   }
 
@@ -274,14 +275,14 @@ void ApMon::updateSysInfo() {
     double dummyVal;
     try {
       /* the number of processes is now obtained with the getProcesses()
-	 function, not with getLoad() */
+     function, not with getLoad() */
       ProcUtils::getLoad(currentSysVals[SYS_LOAD1], currentSysVals[SYS_LOAD5], 
-		    currentSysVals[SYS_LOAD15],dummyVal);
+            currentSysVals[SYS_LOAD15],dummyVal);
     } catch (procutils_error& perr) {
       /* "permanent" error (the parameters could not be obtained) */
       logger(WARNING, perr.what());
       sysRetResults[SYS_LOAD1] = sysRetResults[SYS_LOAD5] = 
-	sysRetResults[SYS_LOAD15] = PROCUTILS_ERROR;
+    sysRetResults[SYS_LOAD15] = PROCUTILS_ERROR;
     }
   }
 
@@ -290,8 +291,8 @@ void ApMon::updateSysInfo() {
   if (needProcessesInfo) {
     try {
       ProcUtils::getProcesses(currentSysVals[SYS_PROCESSES], 
-			      currentProcessStates);
-    } catch (runtime_error& err) {
+                  currentProcessStates);
+    } catch (std::runtime_error& err) {
       logger(WARNING, err.what());
       sysRetResults[SYS_PROCESSES] = RET_ERROR;
     }
@@ -306,19 +307,19 @@ void ApMon::updateSysInfo() {
   if (needMemInfo) {
     try {
       ProcUtils::getMemUsed(currentSysVals[SYS_MEM_USED], 
-			    currentSysVals[SYS_MEM_FREE], 
-			    currentSysVals[SYS_SWAP_USED],
-			    currentSysVals[SYS_SWAP_FREE]);
+                currentSysVals[SYS_MEM_FREE], 
+                currentSysVals[SYS_SWAP_USED],
+                currentSysVals[SYS_SWAP_FREE]);
       currentSysVals[SYS_MEM_USAGE] = 100 * currentSysVals[SYS_MEM_USED] /
-	(currentSysVals[SYS_MEM_USED] +  currentSysVals[SYS_MEM_FREE]); 
+    (currentSysVals[SYS_MEM_USED] +  currentSysVals[SYS_MEM_FREE]); 
       currentSysVals[SYS_SWAP_USAGE] = 100 * currentSysVals[SYS_SWAP_USED] /
-	(currentSysVals[SYS_SWAP_USED] +  currentSysVals[SYS_SWAP_FREE]); 
+    (currentSysVals[SYS_SWAP_USED] +  currentSysVals[SYS_SWAP_FREE]); 
     } catch (procutils_error &perr) {
       logger(WARNING, perr.what());
       sysRetResults[SYS_MEM_USED] = sysRetResults[SYS_MEM_FREE] = 
-	sysRetResults[SYS_SWAP_USED] = sysRetResults[SYS_SWAP_FREE] = 
-	sysRetResults[SYS_MEM_USAGE] = sysRetResults[SYS_SWAP_USAGE] = 
-	PROCUTILS_ERROR;
+    sysRetResults[SYS_SWAP_USED] = sysRetResults[SYS_SWAP_FREE] = 
+    sysRetResults[SYS_MEM_USAGE] = sysRetResults[SYS_SWAP_USAGE] = 
+    PROCUTILS_ERROR;
     }
   }
 
@@ -329,15 +330,15 @@ void ApMon::updateSysInfo() {
   if (needNetInfo && this -> nInterfaces > 0) {
     try {
       ProcUtils::getNetInfo(*this, &currentNetIn, &currentNetOut, 
-			    &currentNetErrs);
+                &currentNetErrs);
     } catch (procutils_error &perr) {
       logger(WARNING, perr.what());
       sysRetResults[SYS_NET_IN] = sysRetResults[SYS_NET_OUT] = 
-	sysRetResults[SYS_NET_ERRS] = PROCUTILS_ERROR;     
-    } catch (runtime_error &err) {
+    sysRetResults[SYS_NET_ERRS] = PROCUTILS_ERROR;     
+    } catch (std::runtime_error &err) {
       logger(WARNING, err.what());
       sysRetResults[SYS_NET_IN] = sysRetResults[SYS_NET_OUT] = 
-	sysRetResults[SYS_NET_ERRS] = RET_ERROR; 
+    sysRetResults[SYS_NET_ERRS] = RET_ERROR; 
     }
   }
 
@@ -346,11 +347,11 @@ void ApMon::updateSysInfo() {
   if (needNetstatInfo) {
     try {
       ProcUtils::getNetstatInfo(*this, this -> currentNSockets, 
-				this -> currentSocketsTCP); 
-    } catch (runtime_error &err) {
+                this -> currentSocketsTCP); 
+    } catch (std::runtime_error &err) {
       logger(WARNING, err.what());
       sysRetResults[SYS_NET_SOCKETS] = sysRetResults[SYS_NET_TCP_DETAILS] = 
-	RET_ERROR; 
+    RET_ERROR; 
     }
   }
 
@@ -405,7 +406,7 @@ void ApMon::sendSysInfo() {
     if (actSysMonitorParams[i] > 0) /* if the parameter is enabled */
       sysRetResults[i] = RET_SUCCESS;
     else /* mark it with RET_ERROR so that it will be not included in the
-	    datagram */
+        datagram */
       sysRetResults[i] = RET_ERROR;
   }
 
@@ -413,14 +414,14 @@ void ApMon::sendSysInfo() {
 
   for (i = 0; i < nSysMonitorParams; i++) {
     if (i == SYS_NET_IN || i == SYS_NET_OUT || i == SYS_NET_ERRS ||
-	i == SYS_NET_SOCKETS || i == SYS_NET_TCP_DETAILS || i == SYS_PROCESSES)
+    i == SYS_NET_SOCKETS || i == SYS_NET_TCP_DETAILS || i == SYS_PROCESSES)
       continue;
 
     if (sysRetResults[i] == PROCUTILS_ERROR) {
       /* could not read the requested information from /proc, disable this
-	 parameter */
+     parameter */
         if (autoDisableMonitoring)
-	    actSysMonitorParams[i] = 0;
+        actSysMonitorParams[i] = 0;
     } 
     else 
     if (sysRetResults[i] != RET_ERROR && currentSysVals[i] != RET_ERROR) {
@@ -435,17 +436,17 @@ void ApMon::sendSysInfo() {
   if (actSysMonitorParams[SYS_NET_IN] == 1) {
     if (sysRetResults[SYS_NET_IN] == PROCUTILS_ERROR) {
       if (autoDisableMonitoring)
-	actSysMonitorParams[SYS_NET_IN] = 0;
+    actSysMonitorParams[SYS_NET_IN] = 0;
     } else  if (sysRetResults[SYS_NET_IN] != RET_ERROR) {
       for (i = 0; i < nInterfaces; i++) {
         if (currentNetIn[i] != RET_ERROR){ 
-	    paramNames[nParams] =  (char *)malloc(20 * sizeof(char));
-	    strncpy(paramNames[nParams], interfaceNames[i], 16);
-	    strcat(paramNames[nParams], "_in");
-	    paramValues[nParams] = (char *)&currentNetIn[i];
-    	    valueTypes[nParams] = XDR_REAL64;
-	    nParams++;
-	}
+        paramNames[nParams] =  (char *)malloc(20 * sizeof(char));
+        strncpy(paramNames[nParams], interfaceNames[i], 16);
+        strcat(paramNames[nParams], "_in");
+        paramValues[nParams] = (char *)&currentNetIn[i];
+            valueTypes[nParams] = XDR_REAL64;
+        nParams++;
+    }
       }
     }
   }
@@ -453,17 +454,17 @@ void ApMon::sendSysInfo() {
   if (actSysMonitorParams[SYS_NET_OUT] == 1) {
     if (sysRetResults[SYS_NET_IN] == PROCUTILS_ERROR) {
       if (autoDisableMonitoring)
-	actSysMonitorParams[SYS_NET_OUT] = 0;
+    actSysMonitorParams[SYS_NET_OUT] = 0;
     } else  if (sysRetResults[SYS_NET_OUT] != RET_ERROR) {
       for (i = 0; i < nInterfaces; i++) { 
-	if (currentNetOut[i] != RET_ERROR){
-    	    paramNames[nParams] =  (char *)malloc(20 * sizeof(char));
-	    strncpy(paramNames[nParams], interfaceNames[i], 15);
-	    strcat(paramNames[nParams], "_out");
-	    paramValues[nParams] = (char *)&currentNetOut[i];
-    	    valueTypes[nParams] = XDR_REAL64;
-	    nParams++;
-	}
+    if (currentNetOut[i] != RET_ERROR){
+            paramNames[nParams] =  (char *)malloc(20 * sizeof(char));
+        strncpy(paramNames[nParams], interfaceNames[i], 15);
+        strcat(paramNames[nParams], "_out");
+        paramValues[nParams] = (char *)&currentNetOut[i];
+            valueTypes[nParams] = XDR_REAL64;
+        nParams++;
+    }
       }
     }
   }
@@ -471,17 +472,17 @@ void ApMon::sendSysInfo() {
   if (actSysMonitorParams[SYS_NET_ERRS] == 1) {
     if (sysRetResults[SYS_NET_ERRS] == PROCUTILS_ERROR) {
       if (autoDisableMonitoring)
-	actSysMonitorParams[SYS_NET_ERRS] = 0;
+    actSysMonitorParams[SYS_NET_ERRS] = 0;
     } else  if (sysRetResults[SYS_NET_ERRS] != RET_ERROR) {
       for (i = 0; i < nInterfaces; i++) {
         if (currentNetErrs[i] != RET_ERROR ){ 
-	    paramNames[nParams] =  (char *)malloc(20 * sizeof(char));
-	    strncpy(paramNames[nParams], interfaceNames[i], 14);
-	    strcat(paramNames[nParams], "_errs");
-	    paramValues[nParams] = (char *)&currentNetErrs[i];
-	    valueTypes[nParams] = XDR_REAL64;
-	    nParams++;
-	}
+        paramNames[nParams] =  (char *)malloc(20 * sizeof(char));
+        strncpy(paramNames[nParams], interfaceNames[i], 14);
+        strcat(paramNames[nParams], "_errs");
+        paramValues[nParams] = (char *)&currentNetErrs[i];
+        valueTypes[nParams] = XDR_REAL64;
+        nParams++;
+    }
       }
     }
   }
@@ -492,12 +493,12 @@ void ApMon::sendSysInfo() {
       char act_states[] = {'D', 'R', 'S', 'T', 'Z'};
       for (i = 0; i < 5; i++) {
         if (currentProcessStates[act_states[i] - 65] != RET_ERROR){
-	  		paramNames[nParams] =  (char *)malloc(20 * sizeof(char));
-	  		snprintf(paramNames[nParams], 19, "processes_%c", act_states[i]);
-	  		paramValues[nParams] = (char *)&currentProcessStates[act_states[i] - 65];
-	  		valueTypes[nParams] = XDR_REAL64;
-	  		nParams++;
-		}
+              paramNames[nParams] =  (char *)malloc(20 * sizeof(char));
+              snprintf(paramNames[nParams], 19, "processes_%c", act_states[i]);
+              paramValues[nParams] = (char *)&currentProcessStates[act_states[i] - 65];
+              valueTypes[nParams] = XDR_REAL64;
+              nParams++;
+        }
       }
     }
   }
@@ -507,12 +508,12 @@ void ApMon::sendSysInfo() {
       const char * const socket_types[] = {"tcp", "udp", "icm", "unix"};
       for (i = 0; i < 4; i++) { 
         if (currentNSockets[i] != RET_ERROR) {
-	    	paramNames[nParams] =  (char *)malloc(30 * sizeof(char));
-	    	snprintf(paramNames[nParams], 29, "sockets_%s", socket_types[i]);
-	    	paramValues[nParams] = (char *)&currentNSockets[i];
-    	    valueTypes[nParams] = XDR_REAL64;
-	    	nParams++;
-		}
+            paramNames[nParams] =  (char *)malloc(30 * sizeof(char));
+            snprintf(paramNames[nParams], 29, "sockets_%s", socket_types[i]);
+            paramValues[nParams] = (char *)&currentNSockets[i];
+            valueTypes[nParams] = XDR_REAL64;
+            nParams++;
+        }
       }
     }
   }
@@ -521,12 +522,12 @@ void ApMon::sendSysInfo() {
     if (sysRetResults[SYS_NET_TCP_DETAILS] != RET_ERROR) {
       for (i = 0; i < N_TCP_STATES; i++) {
         if (currentSocketsTCP[i] != RET_ERROR){
-	    	paramNames[nParams] =  (char *)malloc(30 * sizeof(char));
-	    	snprintf(paramNames[nParams], 29, "sockets_tcp_%s", socketStatesMapTCP[i]);
-	    	paramValues[nParams] = (char *)&currentSocketsTCP[i];
-	    	valueTypes[nParams] = XDR_REAL64;
-	    	nParams++;
-		}
+            paramNames[nParams] =  (char *)malloc(30 * sizeof(char));
+            snprintf(paramNames[nParams], 29, "sockets_tcp_%s", socketStatesMapTCP[i]);
+            paramValues[nParams] = (char *)&currentSocketsTCP[i];
+            valueTypes[nParams] = XDR_REAL64;
+            nParams++;
+        }
       }
     }
   }
@@ -534,8 +535,8 @@ void ApMon::sendSysInfo() {
   try {
     if (nParams > 0)
       sendParameters(sysMonCluster, sysMonNode, nParams, 
-		     paramNames, valueTypes, paramValues);
-  } catch (runtime_error& err) {
+             paramNames, valueTypes, paramValues);
+  } catch (std::runtime_error& err) {
     logger(WARNING, err.what());
   }
 
@@ -578,7 +579,7 @@ void ApMon::updateGeneralInfo() {
       actGenMonitorParams[GEN_TOTAL_SWAP] == 1) {
     try {
       ProcUtils::getSysMem(currentGenVals[GEN_TOTAL_MEM], 
-			   currentGenVals[GEN_TOTAL_SWAP]);
+               currentGenVals[GEN_TOTAL_SWAP]);
     } catch (procutils_error& perr) {
       logger(WARNING, perr.what());
       genRetResults[GEN_TOTAL_MEM] = genRetResults[GEN_TOTAL_SWAP] = PROCUTILS_ERROR;
@@ -660,15 +661,15 @@ void ApMon::sendGeneralInfo() {
 
   for (i = 0; i < nGenMonitorParams; i++) {
     if (actGenMonitorParams[i] != 1 || i == GEN_IP || i == GEN_HOSTNAME ||
-	i == GEN_CPU_VENDOR_ID || i == GEN_CPU_FAMILY || i == GEN_CPU_MODEL
-	|| i == GEN_CPU_MODEL_NAME)
+    i == GEN_CPU_VENDOR_ID || i == GEN_CPU_FAMILY || i == GEN_CPU_MODEL
+    || i == GEN_CPU_MODEL_NAME)
       continue;
 
     if (genRetResults[i] == PROCUTILS_ERROR) {
       /* could not read the requested information from /proc, disable this
-	 parameter */
+     parameter */
       if (autoDisableMonitoring)
-	actGenMonitorParams[i] = 0;
+    actGenMonitorParams[i] = 0;
     } else if (genRetResults[i] != RET_ERROR) {
       paramNames[nParams] = strdup(genMonitorParams[i]);
       paramValues[nParams] = (char *)&currentGenVals[i];
@@ -680,8 +681,8 @@ void ApMon::sendGeneralInfo() {
   try {
     if (nParams > 0)
       sendParameters(sysMonCluster, sysMonNode, nParams, 
-		     paramNames, valueTypes, paramValues);
-  } catch (runtime_error& err) {
+             paramNames, valueTypes, paramValues);
+  } catch (std::runtime_error& err) {
     logger(WARNING, err.what());
   }
 
@@ -844,7 +845,7 @@ void ApMon::parseXApMonLine(char *line) {
 
   if (strstr(param, "sys_") == param) {
     ind = getVectIndex(param + strlen("sys_"), sysMonitorParams, 
-		       nSysMonitorParams);
+               nSysMonitorParams);
     if (ind < 0) {
       pthread_mutex_unlock(&mutexBack);
       snprintf(logmsg, 199, "Invalid parameter name in the configuration file: %s", param);
@@ -857,7 +858,7 @@ void ApMon::parseXApMonLine(char *line) {
 
   if (strstr(param, "job_") == param) {
     ind = getVectIndex(param + strlen("job_"), jobMonitorParams, 
-		       nJobMonitorParams);
+               nJobMonitorParams);
     
     if (ind < 0) {
       pthread_mutex_unlock(&mutexBack);
@@ -871,7 +872,7 @@ void ApMon::parseXApMonLine(char *line) {
 
   if (!found) {
     ind = getVectIndex(param, genMonitorParams, 
-		       nGenMonitorParams);
+               nGenMonitorParams);
     if (ind < 0) {
       pthread_mutex_unlock(&mutexBack);
       snprintf(logmsg, 199, "Invalid parameter name in the configuration file: %s", param);
@@ -891,9 +892,9 @@ void ApMon::parseXApMonLine(char *line) {
 }
   
 long *apmon_mon_utils::getChildren(long pid, int& nChildren) 
-  throw(runtime_error) {
+  throw(std::runtime_error) {
 #ifdef WIN32
-	return 0;
+    return 0;
 #else
   FILE *pf;
   long *pids, *ppids, *children;
@@ -936,7 +937,7 @@ long *apmon_mon_utils::getChildren(long pid, int& nChildren)
   if (pf == NULL) {
     unlink(np_f); unlink(children_f);
     snprintf(msg, MAX_STRING_LEN-1, "[ getChildren() ] The number of sub-processes for %ld could not be determined",
-	    pid);
+        pid);
     throw runtime_error(msg);
   } 
   int retScan = fscanf(pf, "%d", &nProcesses);
@@ -966,7 +967,7 @@ long *apmon_mon_utils::getChildren(long pid, int& nChildren)
   for (i = 0; i < nProcesses; i++) {
     retScan = fscanf(pf, "%ld %ld", &ppids[i], &pids[i]);
     if (retScan < 2)
-	continue;
+    continue;
     /* look for the given process */
     if (pids[i] == children[0] || ppids[i] == children[0])
       processFound = true;
@@ -990,7 +991,7 @@ long *apmon_mon_utils::getChildren(long pid, int& nChildren)
     /* find the children of the i-th child */ 
     for (j = 0; j < nProcesses; j++) {
       if (ppids[j] == children[i]) {
-	children[nChildren++] = pids[j];
+    children[nChildren++] = pids[j];
       }
     }
     i++;
@@ -1010,7 +1011,7 @@ long *apmon_mon_utils::getChildren(long pid, int& nChildren)
 #endif
 }
 
-void apmon_mon_utils::readJobInfo(long pid, PsInfo& info) throw(runtime_error) {
+void apmon_mon_utils::readJobInfo(long pid, PsInfo& info) throw(std::runtime_error) {
 #ifndef WIN32
   long *children;
   FILE *fp;
@@ -1116,20 +1117,20 @@ void apmon_mon_utils::readJobInfo(long pid, PsInfo& info) throw(runtime_error) {
     ungetc(ch, fp);
     if (buf[strlen(buf) - 1] != 10 && ch != EOF) { 
       while (1) {
-	char *sret = fgets(buf2, MAX_STRING_LEN, fp);
-	if (sret == NULL || buf[strlen(buf) - 1] == 10)
-	  break;
+    char *sret = fgets(buf2, MAX_STRING_LEN, fp);
+    if (sret == NULL || buf[strlen(buf) - 1] == 10)
+      break;
       }
     }
 
     ret = sscanf(buf, "%ld %s %s %lf %lf %lf %lf %s", &crt_pid, etime_s, 
-		 cputime_s, &pcpu, &pmem, &rsz, &vsz, cmdName);
+         cputime_s, &pcpu, &pmem, &rsz, &vsz, cmdName);
     if (ret != 8) {
       fclose(fp);
       unlink(ps_f);
       free(children);
       for (i = 0; i < listSize; i++) {
-	free(mem_cmd_list[i]);
+    free(mem_cmd_list[i]);
       }
       free(mem_cmd_list);
       throw runtime_error("[ readJobInfo() ] Error parsing the output of the ps command");
@@ -1159,15 +1160,15 @@ void apmon_mon_utils::readJobInfo(long pid, PsInfo& info) throw(runtime_error) {
     //printf("### mem_cmd_s: %s\n", mem_cmd_s);
     if (getVectIndex(mem_cmd_s, mem_cmd_list, listSize) == -1) {
       /* aonther pid with the same command name, rsz and vsz was not found,
-	 so this is a new process and we can add the amount of memory used by 
-	 it */
+     so this is a new process and we can add the amount of memory used by 
+     it */
       info.pmem += pmem;
       info.vsz += vsz; info.rsz += rsz;
 
       if (info.open_fd >= 0) // if no error occured so far
-	info.open_fd += open_fd;
+    info.open_fd += open_fd;
       /* add an entry in the list so that next time we see another thread of
-	 this process we don't add the amount of  memory again */
+     this process we don't add the amount of  memory again */
       mem_cmd_list[listSize++] = mem_cmd_s;     
     } else {
       free(mem_cmd_s);
@@ -1203,17 +1204,17 @@ long apmon_mon_utils::parsePSTime(char *s) {
        return 3600 * hours + 60 * mins + secs;
     } else {
       if (strchr(s, ':') != NULL) {
-	sscanf(s, "%ld:%ld", &mins, &secs);
-	return 60 * mins + secs;
+    sscanf(s, "%ld:%ld", &mins, &secs);
+    return 60 * mins + secs;
       } else {
-	return RET_ERROR;
+    return RET_ERROR;
       }
     }
   }
 }
 
 void apmon_mon_utils::readJobDiskUsage(MonitoredJob job, 
-				JobDirInfo& info) throw(runtime_error) {
+                JobDirInfo& info) throw(std::runtime_error) {
 #ifndef WIN32
   int status;
   pid_t cpid;
@@ -1309,13 +1310,13 @@ void apmon_mon_utils::readJobDiskUsage(MonitoredJob job,
     throw runtime_error(msg);
   }
   retScan = fscanf(fp, "%s %lf %lf %lf %lf", s_tmp, &(info.disk_total), 
-	 &(info.disk_used), &(info.disk_free), &(info.disk_usage));
-  if (retScan != 5) {	 
+     &(info.disk_used), &(info.disk_free), &(info.disk_usage));
+  if (retScan != 5) {     
     fclose(fp); unlink(du_f);
     snprintf(msg, 199, "[ readJobDiskUsage() ] Error reading df output file for process %ld", job.pid);
     throw runtime_error(msg);
   }
-	 
+     
   fclose(fp);
   unlink(df_f);
   

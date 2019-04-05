@@ -13,7 +13,7 @@ libapmoncpp_la_SOURCES = ApMon.cpp utils.cpp monitor_utils.cpp proc_utils.cpp mo
 
 EXTRA_DIST = ApMon_win.dsp ApMon_win.dsw
 
-libapmoncpp_la_LIBADD = -lpthread 
+libapmoncpp_la_LIBADD = -lpthread -ltirpc
 libapmoncpp_la_LDFLAGS = -version-info 2:6:0
 
 SUBDIRS	= . examples 

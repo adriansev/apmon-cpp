@@ -108,7 +108,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <net/if.h>
-#include <rpc/rpc.h>
+#include <tirpc/rpc/rpc.h>
 #include <netdb.h>
 #include <unistd.h>
 #include <pthread.h>

@@ -5,7 +5,7 @@ endif
 
 
 AM_CXXFLAGS = 
-INCLUDES = -I./ 
+INCLUDES = -I./ -I/usr/include/tirpc
 lib_LTLIBRARIES = libapmoncpp.la
 include_HEADERS = ApMon.h utils.h monitor_utils.h proc_utils.h mon_constants.h xdr.h
 
